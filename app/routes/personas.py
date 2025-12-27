@@ -49,31 +49,34 @@ async def sync_config(
     x_username: str = Header(...), 
     authorization: str = Header(...)
 ):
-    """
-    原始版本：同步人设和记忆
-    """
     if not db.connect():
         raise HTTPException(status_code=500)
         
     try:
-        # 同样需要先做身份校验
+        # 1. 身份校验
         db.cursor.execute("SELECT session_token FROM user_login WHERE username = %s", (x_username,))
         user = db.cursor.fetchone()
         if not user or user.get('session_token') != authorization:
-            raise HTTPException(status_code=401)
+            raise HTTPException(status_code=401, detail="身份验证失败")
 
         persona = payload.get('persona', '')
         memory = payload.get('memory', '')
 
-        # 执行更新或插入
+        # 2. 执行更新/插入
         sql = """
             INSERT INTO user_personas (username, content, memory) 
             VALUES (%s, %s, %s)
             ON DUPLICATE KEY UPDATE content = VALUES(content), memory = VALUES(memory)
         """
+        # 因为你的 MySQLConnector 设置了 autocommit: True
+        # 执行完下面这一行，数据就已经安全存入数据库了
         db.cursor.execute(sql, (x_username, persona, memory))
-        db.conn.commit()
+        
+        # --- 删掉了引起报错的 db.conn.commit() ---
         
         return {"success": True, "message": "同步成功"}
+    except Exception as e:
+        print(f"同步失败报错: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
