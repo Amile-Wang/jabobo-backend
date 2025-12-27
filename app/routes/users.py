@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException, Header, Depends
 from app.models.user import UserCreateRequest, PasswordUpdateRequest
 from app.database import db
+from passlib.context import CryptContext  # 引入加密库
 
 router = APIRouter()
+
+# 1. 初始化加密上下文：强制使用 bcrypt 算法
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # 内部依赖：校验管理员权限
 def verify_admin(x_username: str = Header(...)):
@@ -35,8 +39,11 @@ async def create_user(req: UserCreateRequest, admin_user: str = Depends(verify_a
     if not db.connect():
         raise HTTPException(status_code=500)
     try:
+        # --- 核心修改：对新用户密码进行哈希处理 ---
+        hashed_password = pwd_context.hash(req.password)
+        
         sql = "INSERT INTO user_login (username, password, role) VALUES (%s, %s, %s)"
-        db.cursor.execute(sql, (req.username, req.password, req.role))
+        db.cursor.execute(sql, (req.username, hashed_password, req.role))
         return {"success": True, "message": "创建成功"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -67,8 +74,11 @@ async def update_password(req: PasswordUpdateRequest, x_username: str = Header(.
         if current_user['role'] != "Admin" and x_username != req.username:
             raise HTTPException(status_code=403, detail="无权修改他人密码")
 
+        # --- 核心修改：对新修改的密码进行哈希处理 ---
+        hashed_password = pwd_context.hash(req.new_password)
+
         sql = "UPDATE user_login SET password = %s WHERE username = %s"
-        db.cursor.execute(sql, (req.new_password, req.username))
+        db.cursor.execute(sql, (hashed_password, req.username))
         return {"success": True, "message": "修改成功"}
     finally:
         db.close()
