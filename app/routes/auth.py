@@ -1,8 +1,9 @@
 import uuid
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Header
 from app.models.user import LoginRequest
 from app.database import db
 from app.utils.security import verify_password
+from app.routes.users import get_current_user
 
 router = APIRouter()
 
@@ -30,5 +31,24 @@ async def login(req: LoginRequest):
                 }
         
         raise HTTPException(status_code=401, detail="用户名或密码错误")
+    finally:
+        db.close()
+
+@router.post("/logout")
+async def logout(current_user: dict = Depends(get_current_user)):
+    """
+    通过 Depends(get_current_user) 确保只有携带有效 Token 的人能调用。
+    """
+    if not db.connect():
+        raise HTTPException(status_code=500, detail="数据库连接失败")
+    try:
+        # 将数据库中的 session_token 清空
+        db.cursor.execute(
+            "UPDATE user_login SET session_token = NULL WHERE username = %s",
+            (current_user['username'],)
+        )
+        return {"success": True, "message": "退出成功"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
