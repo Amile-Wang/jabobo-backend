@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, HTTPException
 from app.models.user import LoginRequest
 from app.database import db
@@ -11,23 +12,23 @@ async def login(req: LoginRequest):
         raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
         user = db.query_user(req.username)
-        
-        # --- 这里的打印非常重要 ---
         if user:
-            print(f"DEBUG >> 找到用户: {user['username']}")
-            print(f"DEBUG >> 数据库存的密码: [{user['password']}]")
-            print(f"DEBUG >> 本地发送的明文: [{req.password}]")
-            
-            from app.utils.security import verify_password
-            match = verify_password(req.password, user['password'])
-            print(f"DEBUG >> 比对结果: {match}")
-            
-            if match:
-                return {"success": True, "username": user['username'], "role": user['role']}
-        else:
-            print(f"DEBUG >> 数据库里根本没找到用户: {req.username}")
-        # ------------------------
-
+            # 使用 verify_password 校验哈希
+            if verify_password(req.password, user['password']):
+                # 生成唯一会话令牌
+                token = str(uuid.uuid4())
+                # 存入数据库
+                db.cursor.execute(
+                    "UPDATE user_login SET session_token = %s WHERE username = %s",
+                    (token, user['username'])
+                )
+                return {
+                    "success": True, 
+                    "username": user['username'], 
+                    "role": user['role'],
+                    "token": token  # 必须返回给前端
+                }
+        
         raise HTTPException(status_code=401, detail="用户名或密码错误")
     finally:
         db.close()
