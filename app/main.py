@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, users, personas
+from app.routes import auth, users, config,jabobo_ids
 
 app = FastAPI(title="Jobobo API")
 
@@ -15,7 +15,8 @@ app.add_middleware(
 # 注册所有模块路由
 app.include_router(auth.router, prefix="/api", tags=["认证"])
 app.include_router(users.router, prefix="/api", tags=["用户管理"])
-app.include_router(personas.router, prefix="/api", tags=["业务配置"]) 
+app.include_router(config.router, prefix="/api", tags=["配置管理"]) 
+app.include_router(jabobo_ids.router, prefix="/api", tags=["捷宝宝ids管理"]) 
 
 if __name__ == "__main__":
     import uvicorn
