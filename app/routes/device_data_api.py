@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.database import db  # 复用你已有的数据库实例
 
 router = APIRouter()
-
+#这个接口后面可以用来做OTA
 # 无需鉴权：通过jabobo_id读取设备所有数据
 @router.get("/user/device/full_data")
 async def get_device_full_data(

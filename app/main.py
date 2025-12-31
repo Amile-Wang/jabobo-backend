@@ -18,6 +18,7 @@ app.include_router(users.router, prefix="/api", tags=["用户管理"])
 app.include_router(jabobo_config.router, prefix="/api", tags=["配置管理"]) 
 app.include_router(jabobo_manager.router, prefix="/api", tags=["捷宝宝管理"]) 
 app.include_router(device_data_api.router, prefix="/api", tags=["设备端请求管理"]) 
+app.include_router(chat_config.router, prefix="/api", tags=["聊天差异化配置"]) 
 
 if __name__ == "__main__":
     import uvicorn
