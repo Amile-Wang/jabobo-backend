@@ -144,66 +144,64 @@ async def get_agent_models_config(payload: dict):
                     "llm": "LLM_AliLLM",
                     "type": "mem_local_short"
                 }
-                
-            
             },
             "selected_module": {
-                    "TTS": "TTS_TencentTTS",
-                    "Memory": "Memory_mem_local_short",
-                    "Intent": "Intent_intent_llm",
-                    "LLM": "LLM_AliLLM",
-                    "VLLM": "VLLM_ChatGLMVLLM"
-                },
+                "TTS": "TTS_TencentTTS",
+                "Memory": "Memory_mem_local_short",
+                "Intent": "Intent_intent_llm",
+                "LLM": "LLM_AliLLM",
+                "VLLM": "VLLM_ChatGLMVLLM"
+            },
             "Intent": {
                 "Intent_intent_llm": {
                     "llm": "LLM_AliLLM",
                     "type": "intent_llm",
                     "chat_history_conf": 2
-                },
-                "LLM": {
-                    "LLM_AliLLM": {
-                        "type": "openai",
-                        "top_k": "50",
-                        "top_p": "1",
-                        "api_key": "sk-a9aba32a903d4c9396c58213e67c6fd3",
-                        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-                        "max_tokens": "500",
-                        "model_name": "qwen-turbo-latest",
-                        "temperature": "0.3",
-                        "frequency_penalty": "0",
-                        "device_max_output_size": "0"
-                    }
-                },
-                "TTS": {
-                    "TTS_TencentTTS": {
-                        "type": "tencent",
-                        "appid": "1391329716",
-                        "voice": "101001",
-                        "region": "ap-guangzhou",
-                        "secret_id": "AKIDhGrGTVKwNbbOyMXWHza2HI8vriS8dv3z",
-                        "output_dir": "tmp/",
-                        "secret_key": "a3M6g3GMOKCwjKjxynPr8D4mHagYFk15",
-                        "private_voice": "101015",
-                        "mcp_endpoint": "ws://172.23.0.1:8004/mcp_endpoint/call/?token=ypigecvk6JqVWbXfeKJWf7W1grQa5FbZQuPW3Hm9QVA65Cs5XvoHdQYhGNi%2BLcaj"
-                    }
-                },
-                "voiceprint": {
-                    "speakers": [
-                        "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
-                        "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
-                        "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
-                    ],
-                    "url": "http://172.18.124.147:8005/voiceprint/health?key=61009ac6-0111-4532-98c5-95ee9fabf1f7"
-                },
-                "summaryMemory": "捷宝宝的主要开发人员：除了天豪 ，Alice Lin， Roshan Gao，以及simulation team的小伙伴们，还有AI专家Thomas Du, 硬件大佬Kris Chen,用户体验设计师Alessia Zhang，\n此外，还有特邀顾问团队。",
-                "prompt": "你叫捷宝宝，今年三岁了。\n最喜欢和小朋友聊天，回答他们各种各样的问题，给他们讲故事。\n除非小朋友要求你讲故事，这时候将对话控制内容控制在150字以内。\n\n",
-                "VLLM": {
-                    "VLLM_ChatGLMVLLM": {
-                        "type": "openai",
-                        "api_key": "你的api_key",
-                        "base_url": "https://open.bigmodel.cn/api/paas/v4/",
-                        "model_name": "glm-4v-flash"
-                    }
+                }
+            },
+            "LLM": {
+                "LLM_AliLLM": {
+                    "type": "openai",
+                    "top_k": "50",
+                    "top_p": "1",
+                    "api_key": "sk-a9aba32a903d4c9396c58213e67c6fd3",
+                    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                    "max_tokens": "500",
+                    "model_name": "qwen-turbo-latest",
+                    "temperature": "0.3",
+                    "frequency_penalty": "0",
+                    "device_max_output_size": "0"
+                }
+            },
+            "TTS": {
+                "TTS_TencentTTS": {
+                    "type": "tencent",
+                    "appid": "1391329716",
+                    "voice": "101001",
+                    "region": "ap-guangzhou",
+                    "secret_id": "AKIDhGrGTVKwNbbOyMXWHza2HI8vriS8dv3z",
+                    "output_dir": "tmp/",
+                    "secret_key": "a3M6g3GMOKCwjKjxynPr8D4mHagYFk15",
+                    "private_voice": "101015",
+                    "mcp_endpoint": "ws://172.23.0.1:8004/mcp_endpoint/call/?token=ypigecvk6JqVWbXfeKJWf7W1grQa5FbZQuPW3Hm9QVA65Cs5XvoHdQYhGNi%2BLcaj"
+                }
+            },
+            "voiceprint": {
+                "speakers": [
+                    "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
+                    "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
+                    "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
+                ],
+                "url": "http://172.18.124.147:8005/voiceprint/health?key=61009ac6-0111-4532-98c5-95ee9fabf1f7"
+            },
+            "summaryMemory": "捷宝宝的主要开发人员：除了天豪 ，Alice Lin， Roshan Gao，以及simulation team的小伙伴们，还有AI专家Thomas Du, 硬件大佬Kris Chen,用户体验设计师Alessia Zhang，\n此外，还有特邀顾问团队。",
+            "prompt": "你叫捷宝宝，今年三岁了。\n最喜欢和小朋友聊天，回答他们各种各样的问题，给他们讲故事。\n除非小朋友要求你讲故事，这时候将对话控制内容控制在150字以内。\n\n",
+            "VLLM": {
+                "VLLM_ChatGLMVLLM": {
+                    "type": "openai",
+                    "api_key": "你的api_key",
+                    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+                    "model_name": "glm-4v-flash"
                 }
             }
         }
