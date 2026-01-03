@@ -1,5 +1,9 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Header
 from app.database import db  # 复用你已有的数据库实例
+import json
+from datetime import datetime, timezone
+import time
+
 
 router = APIRouter()
 #这个接口后面可以用来做OTA
@@ -63,13 +67,35 @@ async def handle_ota_request(
     
     # 获取当前时间戳（毫秒）
     now = datetime.now(timezone.utc)
-    # 转换为上海时区的时间戳（秒），然后乘以1000得到毫秒
-    # 上海时区是UTC+8，所以需要加上8*3600秒
     timestamp = int(time.mktime(now.timetuple()) * 1000 + now.microsecond / 1000)
     
-    # 生成激活码 - 这里使用设备MAC地址的后6位作为激活码（模拟）
-    mac_address = device_info.get("mac_address", "00:00:00:00:00:00")
-    activation_code = mac_address.replace(":", "")[-6:].upper()
+    # 检查数据库中是否存在与设备ID匹配的jabobo_id
+    if not db.connect():
+        raise HTTPException(status_code=500, detail="数据库连接失败")
+    
+    try:
+        # 查询数据库中是否存在该设备ID
+        sql = "SELECT username FROM user_personas WHERE jabobo_id = %s"
+        db.cursor.execute(sql, (device_id,))
+        existing_device = db.cursor.fetchone()
+        
+        # 根据设备ID是否存在来决定是否需要激活
+        if existing_device:
+            # 如果设备ID已存在，不返回激活对象
+            activation_obj = None
+            activation_code = None
+        else:
+            # 如果设备ID不存在，生成激活码并返回激活对象
+            mac_address = device_info.get("mac_address", "00:00:00:00:00:00")
+            activation_code = mac_address.replace(":", "")[-6:].upper()
+            
+            # activation_obj = {
+            #     "code": activation_code,
+            #     "message": f"http://xiaozhi.server.com\n{activation_code}",
+            #     "challenge": mac_address  # 使用MAC地址作为挑战码
+            # }
+    finally:
+        db.close()
     
     # 构造响应，按照设备期望的格式
     response_data = {
@@ -77,11 +103,6 @@ async def handle_ota_request(
             "timestamp": timestamp,
             "timeZone": "Asia/Shanghai",
             "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
-        },
-        "activation": {
-            "code": activation_code,
-            "message": f"http://xiaozhi.server.com\n{activation_code}",
-            "challenge": mac_address  # 使用MAC地址作为挑战码
         },
         "firmware": {
             "version": device_info.get("version", "2.0.2"),  # 使用设备当前版本
@@ -91,5 +112,16 @@ async def handle_ota_request(
             "url": "ws://121.41.168.85:8000/xiaozhi/v1/"
         }
     }
+    
+    # 只有在设备未注册时才添加激活对象
+    if activation_obj:
+        response_data["activation"] = activation_obj
+    # else:
+    #     # 如果设备已注册，可以返回一个表示已注册的状态
+    #     response_data["activation"] = {
+    #         "code": "REGISTERED",
+    #         "message": "Device already registered",
+    #         "challenge": device_id
+    #     }
     
     return response_data
