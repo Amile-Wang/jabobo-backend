@@ -74,6 +74,8 @@ async def handle_ota_request(
         raise HTTPException(status_code=500, detail="数据库连接失败")
     
     try:
+        print(f"🔍 [OTA CHECK] Checking if device {device_id} is already registered...")
+        
         # 查询数据库中是否存在该设备ID
         sql = "SELECT username FROM user_personas WHERE jabobo_id = %s"
         db.cursor.execute(sql, (device_id,))
@@ -82,18 +84,22 @@ async def handle_ota_request(
         # 根据设备ID是否存在来决定是否需要激活
         if existing_device:
             # 如果设备ID已存在，不返回激活对象
+            print(f"✅ [OTA CHECK] Device {device_id} is already registered to user: {existing_device.get('username', 'unknown')}")
             activation_obj = None
             activation_code = None
         else:
             # 如果设备ID不存在，生成激活码并返回激活对象
+            print(f"❌ [OTA CHECK] Device {device_id} is not registered, generating activation code...")
             mac_address = device_info.get("mac_address", "00:00:00:00:00:00")
             activation_code = mac_address.replace(":", "")[-6:].upper()
             
-            # activation_obj = {
-            #     "code": activation_code,
-            #     "message": f"http://xiaozhi.server.com\n{activation_code}",
-            #     "challenge": mac_address  # 使用MAC地址作为挑战码
-            # }
+            activation_obj = None
+            
+            activation_obj = { 
+                "code": activation_code,
+                "message": f"http://xiaozhi.server.com\n{activation_code}",
+                "challenge": mac_address  # 使用MAC地址作为挑战码
+            }
     finally:
         db.close()
     
@@ -105,7 +111,7 @@ async def handle_ota_request(
             "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
         },
         "firmware": {
-            "version": device_info.get("version", "2.0.2"),  # 使用设备当前版本
+            "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
             "url": "http://xiaozhi.server.com:8002/xiaozhi/otaMag/download/NOT_ACTIVATED_FIRMWARE_THIS_IS_A_INVALID_URL"
         },
         "websocket": {
@@ -116,12 +122,9 @@ async def handle_ota_request(
     # 只有在设备未注册时才添加激活对象
     if activation_obj:
         response_data["activation"] = activation_obj
-    # else:
-    #     # 如果设备已注册，可以返回一个表示已注册的状态
-    #     response_data["activation"] = {
-    #         "code": "REGISTERED",
-    #         "message": "Device already registered",
-    #         "challenge": device_id
-    #     }
+        print(f"🔐 [OTA ACTIVATION] Activation code {activation_code} generated for unregistered device {device_id}")
+    else:
+        
+        print(f"🔓 [OTA ACTIVATION] No activation needed for registered device {device_id}")
     
     return response_data
