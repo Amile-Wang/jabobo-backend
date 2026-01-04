@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query, Header
-from app.database import db  # 复用你已有的数据库实例
+from app.database import db, unactivated_macs, activation_codes  # 复用你已有的数据库实例和全局数组
 import json
 from datetime import datetime, timezone
 import time
-
+import hashlib
 
 router = APIRouter()
 #这个接口后面可以用来做OTA
@@ -91,9 +91,13 @@ async def handle_ota_request(
             # 如果设备ID不存在，生成激活码并返回激活对象
             print(f"❌ [OTA CHECK] Device {device_id} is not registered, generating activation code...")
             mac_address = device_info.get("mac_address", "00:00:00:00:00:00")
-            activation_code = mac_address.replace(":", "")[-6:].upper()
-            
-            activation_obj = None
+            activation_code =generate_activation_code_from_mac(mac_address)
+            if mac_address not in unactivated_macs:
+                unactivated_macs.append(mac_address)
+                activation_codes.append(activation_code)
+                
+            print(f"➕ [OTA ACTIVATION] 当前未激活的MAC地址和激活码：{unactivated_macs} {activation_codes}" )
+            # activation_obj = None
             
             activation_obj = { 
                 "code": activation_code,
@@ -128,3 +132,75 @@ async def handle_ota_request(
         print(f"🔓 [OTA ACTIVATION] No activation needed for registered device {device_id}")
     
     return response_data
+
+def generate_activation_code_from_mac(mac_address: str) -> str:
+    """
+    从MAC地址生成固定的6位数字激活码
+    相同的MAC地址总是生成相同的激活码
+    """
+    # 清除MAC地址中的分隔符（冒号、破折号、空格等）
+    clean_mac = ''.join(c for c in mac_address if c.isalnum()).lower()
+    
+    # 使用MD5哈希确保相同MAC地址在不同运行时始终生成相同的激活码
+    hash_object = hashlib.md5(clean_mac.encode())
+    hex_dig = hash_object.hexdigest()
+    
+    # 取哈希值的前8位并转换为整数，然后取模确保是6位数字
+    # 将十六进制转换为十进制，并限制在6位数字范围内
+    hex_part = hex_dig[:8]  # 取前8位十六进制字符
+    int_value = int(hex_part, 16)  # 转换为整数
+    activation_code = str(int_value % 1000000).zfill(6)  # zfill确保是6位，不足前面补0
+    
+    return activation_code
+
+@router.post("/user/device/ota/activate")
+async def activate_device(
+    device_info: dict,
+    device_id: str = Header(None, alias="Device-Id"),
+    client_id: str = Header(None, alias="Client-Id"),
+    user_agent: str = Header(None, alias="User-Agent"),
+    activation_version: str = Header(None, alias="Activation-Version")
+):
+    """
+    激活设备端点：通过激活码激活设备
+    激活成功返回200状态码，激活失败返回203状态码
+    """
+    print(f"Activation request received - Device-Id: {device_id}")
+    
+    # 检查数据库连接
+    if not db.connect():
+        return {"success": False, "message": "数据库连接失败", "status": "failed"}, 500
+    try:
+        print(f"🔍 [OTA CHECK] Checking if device {device_id} is already registered...")
+        
+        # 查询数据库中是否存在该设备ID
+        sql = "SELECT username FROM user_personas WHERE jabobo_id = %s"
+        db.cursor.execute(sql, (device_id,))
+        existing_device = db.cursor.fetchone()
+        
+        activation_index = unactivated_macs.index(device_id)
+        
+        
+        # 根据设备ID是否存在来检查是否激活成功
+        if existing_device:
+            # 如果设备ID已存在，返回200状态码
+            print(f"✅ [OTA CHECK] Device {device_id} is already registered to user: {existing_device.get('username', 'unknown')}")
+            unactivated_macs.pop(activation_index)
+            activation_codes.pop(activation_index)
+            # 返回200状态码表示激活成功
+            return 200
+
+        else:
+            # 如果设备ID不存在，返回203状态码
+            print(f"❌ [OTA CHECK] Device {device_id} is not registered, activation failed.")
+            # 延迟5秒
+            time.sleep(5)
+            return  203
+    except Exception as e:
+        print(f"❌ [ACTIVATION] Activation failed with error: {str(e)}")
+        # 延迟5秒
+        time.sleep(5)
+        # 返回203状态码表示激活失败
+        return 203
+    finally:
+        db.close()

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header, Query, Body
-from app.database import db
+from app.database import db, unactivated_macs, activation_codes
 import json
 
 router = APIRouter()
@@ -39,6 +39,14 @@ async def bind_jabobo(
 ):
     jabobo_id = payload.get("jabobo_id")
     if not jabobo_id: raise HTTPException(status_code=400, detail="缺少设备 ID")
+    
+    # 优化绑定流程：检查是否为配对码，如果是则使用对应的MAC地址
+    if jabobo_id in activation_codes:
+        # 根据配对码找到对应的MAC地址
+        activation_code_index = activation_codes.index(jabobo_id)
+        jabobo_id = unactivated_macs[activation_code_index]
+        print(f"🔑 [ACTIVATION] Pairing code {jabobo_id} matched MAC address {jabobo_id}")
+
 
     if not db.connect(): raise HTTPException(status_code=500)
     try:
