@@ -53,3 +53,8 @@ class MySQLConnector:
 
 # 实例化
 db = MySQLConnector()
+
+# 全局数组，用于存储未激活的MAC地址和对应的激活码
+# 重启时这些数组会自动清空
+unactivated_macs = []  # 存储未激活的MAC地址
+activation_codes = []  # 存储对应的激活码
