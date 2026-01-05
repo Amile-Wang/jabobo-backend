@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, users, jabobo_config,jabobo_manager,device_data_api,jabobo_knowlege
-from app.routes import auth, users, jabobo_config,jabobo_manager,device_data_api,chat_config
+from app.routes import auth, users, jabobo_config,jabobo_manager,device_data_api,jabobo_knowlege,chat_config
+
 
 app = FastAPI(title="Jobobo API")
 
