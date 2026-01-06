@@ -3,9 +3,17 @@ from fastapi import APIRouter, HTTPException, Header, Path
 from app.database import db
 import json
 from typing import Dict, Any  # 添加typing导入
+import os
+from dotenv import load_dotenv
 
+# 加载.env文件，不修改原有换行/格式
+load_dotenv()
 
 router = APIRouter()
+
+# 辅助函数：仅读取环境变量，不影响原格式
+def get_env(key: str) -> str:
+    return os.getenv(key, "")
 
 # 1. 获取服务器基础配置
 @router.post("/config/server-base")
@@ -26,14 +34,14 @@ async def get_server_base_config():
             },
             "server": {
                 "sms_max_send_count": 10,
-                "fronted_url": "http://xiaozhi.server.com",
-                "websocket": "ws://121.41.168.85:8000/xiaozhi/v1/",
+                "fronted_url": get_env("FRONTED_URL"),
+                "websocket": get_env("WEBSOCKET_URL"),
                 "name": "xiaozhi-esp32-server",
-                "mcp_endpoint": "http://172.23.0.1:8004/mcp_endpoint/health?key=feeefd9e4ab54adf84f8db612a647754",
-                "voice_print": "http://172.18.124.147:8005/voiceprint/health?key=61009ac6-0111-4532-98c5-95ee9fabf1f7",
-                "secret": "443d967a-3538-443e-bb2a-45490c25d01a",
+                "mcp_endpoint": get_env("MCP_ENDPOINT"),
+                "voice_print": get_env("VOICEPRINT_URL"),
+                "secret": get_env("SERVER_SECRET"),
                 "beian_ga_num": "None",
-                "ota": "http://121.41.168.85:8002/xiaozhi/ota/",
+                "ota": get_env("OTA_URL"),
                 "beian_icp_num": "None",
                 "allow_user_register": True,
                 "enable_mobile_register": False
@@ -139,7 +147,7 @@ async def get_agent_models_config(payload: dict):
         # 模拟代理模型配置
         agent_models_config = {
             "plugins": {
-                "get_weather": "{\"api_key\": \"3d9da0ec288743b89c6a3e47dae98e1e\", \"api_host\": \"py78kyqwtq.re.qweatherapi.com\", \"default_location\": \"广州\"}"
+                "get_weather": "{\"api_key\": \"" + get_env("WEATHER_API_KEY") + "\", \"api_host\": \"py78kyqwtq.re.qweatherapi.com\", \"default_location\": \"广州\"}"
             },
             "Memory": {
                 "Memory_mem_local_short": {
@@ -167,8 +175,8 @@ async def get_agent_models_config(payload: dict):
                     "type": "openai",
                     "top_k": "50",
                     "top_p": "1",
-                    "api_key": "sk-a9aba32a903d4c9396c58213e67c6fd3",
-                    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                    "api_key": get_env("ALI_LLM_API_KEY"),
+                    "base_url": get_env("ALI_LLM_BASE_URL"),
                     "max_tokens": "500",
                     "model_name": "qwen-turbo-latest",
                     "temperature": "0.3",
@@ -179,8 +187,8 @@ async def get_agent_models_config(payload: dict):
                     "type": "openai", 
                     "top_k": "", 
                     "top_p": "", 
-                    "api_key": "sk-43753ec3b99443a9911156d9cb3d2e4d", 
-                    "base_url": "https://api.deepseek.com", 
+                    "api_key": get_env("DEEPSEEK_LLM_API_KEY"), 
+                    "base_url": get_env("DEEPSEEK_LLM_BASE_URL"), 
                     "max_tokens": "", 
                     "model_name": "deepseek-chat", 
                     "temperature": "", 
@@ -193,11 +201,11 @@ async def get_agent_models_config(payload: dict):
                     "appid": "1391329716",
                     "voice": "101001",
                     "region": "ap-guangzhou",
-                    "secret_id": "AKIDhGrGTVKwNbbOyMXWHza2HI8vriS8dv3z",
+                    "secret_id": get_env("TENCENT_TTS_SECRET_ID"),
                     "output_dir": "tmp/",
-                    "secret_key": "a3M6g3GMOKCwjKjxynPr8D4mHagYFk15",
+                    "secret_key": get_env("TENCENT_TTS_SECRET_KEY"),
                     "private_voice": "101015",
-                    "mcp_endpoint": "ws://172.23.0.1:8004/mcp_endpoint/call/?token=ypigecvk6JqVWbXfeKJWf7W1grQa5FbZQuPW3Hm9QVA65Cs5XvoHdQYhGNi%2BLcaj"
+                    "mcp_endpoint": get_env("TTS_MCP_ENDPOINT")
                 }
             },
             "voiceprint": {
@@ -206,7 +214,7 @@ async def get_agent_models_config(payload: dict):
                     "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
                     "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
                 ],
-                "url": "http://172.18.124.147:8005/voiceprint/health?key=61009ac6-0111-4532-98c5-95ee9fabf1f7"
+                "url": get_env("VOICEPRINT_URL")
             },
             "summaryMemory": device_memory,  # 从数据库获取设备特定的记忆
             # 从数据库获取设备特定的prompt
@@ -214,8 +222,8 @@ async def get_agent_models_config(payload: dict):
             "VLLM": {
                 "VLLM_ChatGLMVLLM": {
                     "type": "openai",
-                    "api_key": "你的api_key",
-                    "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+                    "api_key": get_env("CHATGLM_VLLM_API_KEY"),
+                    "base_url": get_env("CHATGLM_VLLM_BASE_URL"),
                     "model_name": "glm-4v-flash"
                 }
             }
