@@ -6,7 +6,6 @@ import shutil
 from typing import List, Optional
 from datetime import datetime  # 处理时间戳
 
-# 全局Router（仅定义一次）
 router = APIRouter()
 
 # --- 新增：游标修复辅助函数 ---
@@ -78,7 +77,7 @@ def get_username_by_jabobo_id(jabobo_id: str):
 # 配置常量 - 音频文件相关
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".ogg", ".flac", ".m4a"}  # 常见音频格式
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 增大到100MB（音频文件通常更大）
-BASE_DATA_DIR = "./audio_data"  # 音频专用存储目录
+BASE_DATA_DIR = "./data"  # 音频专用存储目录
 
 # --- 上传音频接口（修改：先查用户再写入）---
 @router.post("/user/upload-audio")
@@ -118,7 +117,7 @@ async def upload_audio_file(
 
     # 3. 创建音频文件存储目录（仅基于设备ID，移除用户名层级）
     print(f"\n[目录创建] 开始创建音频存储目录")
-    target_dir = os.path.join(BASE_DATA_DIR, jabobo_id,"audio_files")  # 仅保留设备ID目录
+    target_dir = os.path.join(BASE_DATA_DIR, username,jabobo_id,"audio_files")  # 仅保留设备ID目录
     print(f"[目录创建] 音频目标目录：{target_dir}")
     os.makedirs(target_dir, exist_ok=True)
     print(f"[目录创建] 音频目录创建完成（已存在则跳过）")
@@ -335,33 +334,38 @@ async def delete_audio_file(
     print(f"\n===== 开始处理音频文件删除请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"[请求信息] 用户名：{x_username} | 设备ID：{jabobo_id} | 要删除的音频文件路径：{file_path}")
     
-    # 身份验证
-    verify_user(x_username, authorization)
-    
-    # 安全校验（调整为检查设备ID是否在路径中）
-    print(f"\n[权限校验] 检查音频文件是否属于当前设备ID")
-    if jabobo_id not in file_path:
-        print(f"[权限校验] 失败 - 音频文件路径不含设备ID {jabobo_id}")
-        raise HTTPException(status_code=403, detail="无权删除该音频文件（路径不属于当前设备）")
-    print(f"[权限校验] 通过")
+    # 声明游标变量，避免未定义报错
+    cursor = None
     
     try:
+        # 1. 身份验证
+        verify_user(x_username, authorization)
+        
+        # 2. 安全校验（检查设备ID是否在路径中）
+        print(f"\n[权限校验] 检查音频文件是否属于当前设备ID")
+        if jabobo_id not in file_path:
+            print(f"[权限校验] 失败 - 音频文件路径不含设备ID {jabobo_id}")
+            raise HTTPException(status_code=403, detail="无权删除该音频文件（路径不属于当前设备）")
+        print(f"[权限校验] 通过")
+        
+        # 3. 数据库连接
         print(f"\n[数据库操作] 开始查询音频文件记录")
         if not db.connect():
             print(f"[数据库操作] 失败 - 数据库连接失败")
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
-        # 获取有效游标
+        # 4. 获取有效游标
         cursor = get_valid_cursor()
         
-        # 执行查询（仅按设备ID查询）
+        # 5. 查询现有音频记录
         query_sql = "SELECT audio_status FROM user_personas WHERE jabobo_id = %s"
         print(f"[数据库操作] 执行查询SQL：{query_sql} | 参数：({jabobo_id})")
         cursor.execute(query_sql, (jabobo_id,))
         result = cursor.fetchone()
         print(f"[数据库操作] 查询结果：{result}")
         
-        # 解析音频路径列表
+        # 6. 解析音频列表
+        audio_path_list = []
         if result and result.get("audio_status") is not None:
             try:
                 audio_path_list = json.loads(result["audio_status"])
@@ -371,116 +375,59 @@ async def delete_audio_file(
                 audio_path_list = []
         else:
             print(f"[数据处理] 无现有音频记录")
-            audio_path_list = []
         
-        # 检查音频文件是否存在于列表
+        # 7. 检查音频文件是否存在于列表
         print(f"[存在性检查] 检查音频文件路径是否在列表中：{file_path}")
-        # 兼容新/旧格式
         file_exists = False
-        if isinstance(audio_path_list[0], dict) if audio_path_list else False:
-            file_exists = any(item.get("file_path") == file_path for item in audio_path_list)
-        else:
-            file_exists = file_path in audio_path_list
+        if audio_path_list:
+            if isinstance(audio_path_list[0], dict):
+                file_exists = any(item.get("file_path") == file_path for item in audio_path_list)
+            else:
+                file_exists = file_path in audio_path_list
         
         if not file_exists:
             print(f"[存在性检查] 失败 - 音频文件路径不在音频列表中")
             raise HTTPException(status_code=404, detail="音频文件路径不存在于音频列表中")
         print(f"[存在性检查] 通过")
         
-        # 1. 删除本地音频文件
+        # 8. 删除本地音频文件
         print(f"\n[文件删除] 开始删除本地音频文件：{file_path}")
         if os.path.exists(file_path):
-            os.remove(file_path)
-            print(f"[文件删除] 成功 - 本地音频文件已删除")
-        else:
-            print(f"[文件删除] 跳过 - 本地音频文件不存在")
-        
-        # 2. 从列表移除音频路径
-        print(f"\n[数据更新] 从音频列表移除文件路径")
-        if isinstance(audio_path_list[0], dict) if audio_path_list else False:
-            audio_path_list = [item for item in audio_path_list if item.get("file_path") != file_path]
-        else:
-            audio_path_list.remove(file_path)
-        print(f"[数据更新] 移除完成 - 新音频列表长度：{len(audio_path_list)}")
-        
-        # 3. 更新数据库（仅关联设备ID）
-        audio_status_json = json.dumps(audio_path_list, ensure_ascii=False)
-        upsert_sql = """
-            INSERT INTO user_personas (jabobo_id, audio_status)
-            VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE audio_status = VALUES(audio_status)
-        """
-        print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({jabobo_id}, {audio_status_json[:100]}...)")
-        cursor.execute(upsert_sql, (jabobo_id, audio_status_json))
-        
-        print(f"\n[删除完成] 成功 - 删除音频文件路径：{file_path} | 剩余音频记录数：{len(audio_path_list)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"===== 音频删除请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        return {
-            "success": True,
-            "deleted_path": file_path,
-            "remaining_audio_paths": audio_path_list,
-            "message": "音频文件删除成功"
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"\n[删除异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        cursor.execute(query_sql, (jabobo_id,))
-        result = cursor.fetchone()
-        print(f"[数据库操作] 查询结果：{result}")
-        
-        # 解析音频路径列表
-        if result and result.get("audio_status") is not None:
             try:
-                audio_path_list = json.loads(result["audio_status"])
-                print(f"[数据解析] 解析现有音频列表成功 - 列表长度：{len(audio_path_list)}")
-            except json.JSONDecodeError:
-                print(f"[数据解析] 失败 - 重置为空列表")
-                audio_path_list = []
-        else:
-            print(f"[数据处理] 无现有音频记录")
-            audio_path_list = []
-        
-        # 检查音频文件是否存在于列表
-        print(f"[存在性检查] 检查音频文件路径是否在列表中：{file_path}")
-        # 兼容新/旧格式
-        file_exists = False
-        if isinstance(audio_path_list[0], dict) if audio_path_list else False:
-            file_exists = any(item.get("file_path") == file_path for item in audio_path_list)
-        else:
-            file_exists = file_path in audio_path_list
-        
-        if not file_exists:
-            print(f"[存在性检查] 失败 - 音频文件路径不在音频列表中")
-            raise HTTPException(status_code=404, detail="音频文件路径不存在于音频列表中")
-        print(f"[存在性检查] 通过")
-        
-        # 1. 删除本地音频文件
-        print(f"\n[文件删除] 开始删除本地音频文件：{file_path}")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            print(f"[文件删除] 成功 - 本地音频文件已删除")
+                os.remove(file_path)
+                print(f"[文件删除] 成功 - 本地音频文件已删除")
+            except Exception as file_e:
+                print(f"[文件删除] 失败 - 异常：{str(file_e)}")
+                raise HTTPException(status_code=500, detail=f"删除本地文件失败：{str(file_e)}")
         else:
             print(f"[文件删除] 跳过 - 本地音频文件不存在")
         
-        # 2. 从列表移除音频路径
+        # 9. 从列表移除音频路径
         print(f"\n[数据更新] 从音频列表移除文件路径")
-        if isinstance(audio_path_list[0], dict) if audio_path_list else False:
-            audio_path_list = [item for item in audio_path_list if item.get("file_path") != file_path]
-        else:
-            audio_path_list.remove(file_path)
+        if audio_path_list:
+            if isinstance(audio_path_list[0], dict):
+                audio_path_list = [item for item in audio_path_list if item.get("file_path") != file_path]
+            else:
+                audio_path_list.remove(file_path)
         print(f"[数据更新] 移除完成 - 新音频列表长度：{len(audio_path_list)}")
         
-        # 3. 更新数据库（仅关联设备ID）
+        # 10. 更新数据库（核心修复：添加 username 字段）
         audio_status_json = json.dumps(audio_path_list, ensure_ascii=False)
+        # 修复 UPSERT SQL，补充 username 字段
         upsert_sql = """
-            INSERT INTO user_personas (jabobo_id, audio_status)
-            VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE audio_status = VALUES(audio_status)
+            INSERT INTO user_personas (jabobo_id, username, audio_status)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE 
+                audio_status = VALUES(audio_status),
+                username = VALUES(username)  # 可选：如需更新用户名则保留，否则删除该行
         """
-        print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({jabobo_id}, {audio_status_json[:100]}...)")
-        cursor.execute(upsert_sql, (jabobo_id, audio_status_json))
+        print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({jabobo_id}, {x_username}, {audio_status_json[:100]}...)")
+        # 传入 x_username 参数（从请求头获取的真实用户名）
+        cursor.execute(upsert_sql, (jabobo_id, x_username, audio_status_json))
+        # 提交事务（关键：确保数据写入）
+        db.connection.commit()
         
+        # 11. 返回成功结果
         print(f"\n[删除完成] 成功 - 删除音频文件路径：{file_path} | 剩余音频记录数：{len(audio_path_list)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"===== 音频删除请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         return {
@@ -489,10 +436,14 @@ async def delete_audio_file(
             "remaining_audio_paths": audio_path_list,
             "message": "音频文件删除成功"
         }
+    
+    # 捕获业务异常（HTTPException）
     except HTTPException:
         raise
+    # 捕获其他所有异常
     except Exception as e:
         print(f"\n[删除异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        # 数据库回滚
         if db.connection:
             try:
                 print(f"[数据库回滚] 开始回滚事务")
@@ -500,7 +451,15 @@ async def delete_audio_file(
                 print(f"[数据库回滚] 回滚完成")
             except Exception as rollback_e:
                 print(f"[数据库回滚] 失败 - 异常：{str(rollback_e)}")
+        # 关闭游标（避免资源泄漏）
+        if cursor:
+            try:
+                cursor.close()
+            except:
+                pass
         raise HTTPException(status_code=500, detail=f"删除音频文件失败：{str(e)}")
+    
+    # 最终资源释放
     finally:
         print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         db.close()

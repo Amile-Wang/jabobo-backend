@@ -3,5 +3,5 @@ config.json
 ./data/
 backend.log
 
-data/tianhao/80:b5:4e:d4:e9:38/kb_files/pat.txt
+data/
 audio_data/
