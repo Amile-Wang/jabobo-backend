@@ -5,7 +5,7 @@ import os
 import shutil
 from typing import List
 from datetime import datetime  # 处理时间戳
-
+from app.utils.rag import generate_vector_from_txt_folder,build_rag_prompt_from_vector_file
 # 全局Router（仅定义一次）
 router = APIRouter()
 
@@ -96,8 +96,12 @@ async def upload_knowledge_base(
     # 3. 创建目录
     print(f"\n[目录创建] 开始创建存储目录")
     target_dir = os.path.join(BASE_DATA_DIR, x_username, jabobo_id,"kb_files")
+    pkl_target_dir = os.path.join(BASE_DATA_DIR, x_username, jabobo_id,"pkl_file")
+
     print(f"[目录创建] 目标目录：{target_dir}")
     os.makedirs(target_dir, exist_ok=True)
+    os.makedirs(pkl_target_dir, exist_ok=True)
+
     print(f"[目录创建] 目录创建完成（已存在则跳过）")
     
     # 4. 构建文件路径
@@ -111,7 +115,7 @@ async def upload_knowledge_base(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         print(f"[文件存储] 文件写入完成 - 实际文件大小：{os.path.getsize(file_path)} 字节")
-        
+        generate_vector_from_txt_folder(target_dir,os.path.join(pkl_target_dir,"kb.pkl"))
         # 5. 数据库操作
         print(f"\n[数据库操作] 开始处理数据库逻辑")
         if not db.connect():
@@ -300,13 +304,14 @@ async def delete_knowledge_base(
     x_username: str = Header(...), 
     authorization: str = Header(...)
 ):
+    # 打印删除请求开始日志，包含时间戳，便于排查问题
     print(f"\n===== 开始处理文件删除请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"[请求信息] 用户名：{x_username} | 设备ID：{jabobo_id} | 要删除的文件路径：{file_path}")
     
-    # 身份验证
+    # 1. 身份验证：校验用户token/权限合法性
     verify_user(x_username, authorization)
     
-    # 安全校验
+    # 2. 安全校验：防止越权删除，检查文件路径是否归属当前用户
     print(f"\n[权限校验] 检查文件是否属于当前用户")
     if x_username not in file_path:
         print(f"[权限校验] 失败 - 文件路径不含用户名 {x_username}")
@@ -314,36 +319,39 @@ async def delete_knowledge_base(
     print(f"[权限校验] 通过")
     
     try:
+        # 3. 数据库操作：查询用户知识库记录，确认文件是否在用户的知识库列表中
         print(f"\n[数据库操作] 开始查询知识库记录")
+        # 检查数据库连接状态
         if not db.connect():
             print(f"[数据库操作] 失败 - 数据库连接失败")
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
-        # 获取有效游标
+        # 获取有效数据库游标（用于执行SQL）
         cursor = get_valid_cursor()
         
-        # 执行查询
+        # 执行查询：获取用户对应设备的知识库状态（kb_status存储文件路径列表）
         query_sql = "SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s"
         print(f"[数据库操作] 执行查询SQL：{query_sql} | 参数：({x_username}, {jabobo_id})")
         cursor.execute(query_sql, (x_username, jabobo_id))
         result = cursor.fetchone()
         print(f"[数据库操作] 查询结果：{result}")
         
-        # 解析路径列表
+        # 解析知识库路径列表：兼容JSON格式存储的路径列表
         if result and result.get("kb_status") is not None:
             try:
                 kb_path_list = json.loads(result["kb_status"])
                 print(f"[数据解析] 解析现有知识库列表成功 - 列表长度：{len(kb_path_list)}")
             except json.JSONDecodeError:
+                # 解析失败时重置为空列表，避免程序崩溃
                 print(f"[数据解析] 失败 - 重置为空列表")
                 kb_path_list = []
         else:
             print(f"[数据处理] 无现有知识库记录")
             kb_path_list = []
         
-        # 检查文件是否存在于列表
+        # 4. 存在性检查：确认要删除的文件路径是否在用户的知识库列表中
         print(f"[存在性检查] 检查文件路径是否在列表中：{file_path}")
-        # 兼容新/旧格式
+        # 兼容两种存储格式：旧格式（纯路径字符串列表）、新格式（字典列表，包含file_path字段）
         file_exists = False
         if isinstance(kb_path_list[0], dict) if kb_path_list else False:
             file_exists = any(item.get("file_path") == file_path for item in kb_path_list)
@@ -355,7 +363,7 @@ async def delete_knowledge_base(
             raise HTTPException(status_code=404, detail="文件路径不存在于知识库列表中")
         print(f"[存在性检查] 通过")
         
-        # 1. 删除本地文件
+        # 5. 本地文件删除：删除物理文件
         print(f"\n[文件删除] 开始删除本地文件：{file_path}")
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -363,15 +371,17 @@ async def delete_knowledge_base(
         else:
             print(f"[文件删除] 跳过 - 本地文件不存在")
         
-        # 2. 从列表移除路径
+        # 6. 数据更新：从知识库列表中移除已删除的文件路径
         print(f"\n[数据更新] 从知识库列表移除文件路径")
         if isinstance(kb_path_list[0], dict) if kb_path_list else False:
+            # 新格式：过滤掉匹配的字典项
             kb_path_list = [item for item in kb_path_list if item.get("file_path") != file_path]
         else:
+            # 旧格式：直接移除路径字符串
             kb_path_list.remove(file_path)
         print(f"[数据更新] 移除完成 - 新列表长度：{len(kb_path_list)}")
         
-        # 3. 更新数据库
+        # 7. 数据库更新：将更新后的知识库列表写回数据库（存在则更新，不存在则插入）
         kb_status_json = json.dumps(kb_path_list, ensure_ascii=False)
         upsert_sql = """
             INSERT INTO user_personas (username, jabobo_id, kb_status) 
@@ -381,8 +391,29 @@ async def delete_knowledge_base(
         print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({x_username}, {jabobo_id}, {kb_status_json[:100]}...)")
         cursor.execute(upsert_sql, (x_username, jabobo_id, kb_status_json))
         
+        # 打印删除完成日志
         print(f"\n[删除完成] 成功 - 删除文件路径：{file_path} | 剩余记录数：{len(kb_path_list)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"===== 删除请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        # 8. 向量文件处理：删除文件后检查知识库目录是否为空，更新向量文件
+        # 构建知识库目录和向量文件目录路径
+        target_dir = os.path.join(BASE_DATA_DIR, x_username, jabobo_id,"kb_files")
+        pkl_target_dir = os.path.join(BASE_DATA_DIR, x_username, jabobo_id,"pkl_file")
+        pkl_path = os.path.join(pkl_target_dir,"kb.pkl")
+
+        # 核心逻辑：检查知识库目录是否有文件（极简版）
+        # 生成器表达式遍历目录，判断是否存在文件；若目录不存在则视为无文件
+        has_files = any(os.path.isfile(os.path.join(target_dir, f)) for f in os.listdir(target_dir)) if os.path.isdir(target_dir) else False
+
+        if not has_files:
+            # 知识库目录为空：清空向量文件目录下的所有文件
+            if os.path.isdir(pkl_target_dir):
+                [os.remove(os.path.join(pkl_target_dir, f)) for f in os.listdir(pkl_target_dir) if os.path.isfile(os.path.join(pkl_target_dir, f))]
+        else:
+            # 知识库目录有文件：重新生成向量文件
+            generate_vector_from_txt_folder(target_dir, pkl_path)
+                
+        # 返回删除成功结果
         return {
             "success": True,
             "deleted_path": file_path,
@@ -390,8 +421,10 @@ async def delete_knowledge_base(
             "message": "知识库文件删除成功"
         }
     except HTTPException:
+        # 捕获业务异常（如403/404），直接抛出不处理
         raise
     except Exception as e:
+        # 捕获系统异常，打印错误日志并回滚数据库
         print(f"\n[删除异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         if db.connection:
             try:
@@ -400,8 +433,97 @@ async def delete_knowledge_base(
                 print(f"[数据库回滚] 回滚完成")
             except Exception as rollback_e:
                 print(f"[数据库回滚] 失败 - 异常：{str(rollback_e)}")
+        # 抛出500异常，告知前端删除失败
         raise HTTPException(status_code=500, detail=f"删除知识库文件失败：{str(e)}")
     finally:
+        # 最终操作：无论成功/失败，都关闭数据库连接释放资源
         print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         db.close()
         print(f"[资源释放] 数据库连接已关闭\n")
+
+
+def get_username_by_jabobo_id(jabobo_id: str):
+    """根据设备ID查询对应的用户名，适配联合主键"""
+    print(f"\n[用户查询] 开始通过设备ID查询用户名 - jabobo_id：{jabobo_id} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    # 获取有效游标
+    cursor = get_valid_cursor()
+    
+    # 执行查询（核心：通过jabobo_id查username）
+    query_sql = "SELECT username FROM user_personas WHERE jabobo_id = %s LIMIT 1"
+    print(f"[用户查询] 执行SQL：{query_sql} | 参数：({jabobo_id})")
+    cursor.execute(query_sql, (jabobo_id,))
+    result = cursor.fetchone()
+    
+    # 校验查询结果
+    if not result or not result.get("username"):
+        print(f"[用户查询] 失败 - 未找到设备ID {jabobo_id} 对应的用户 | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        raise HTTPException(status_code=404, detail=f"未找到设备ID {jabobo_id} 对应的用户记录")
+    
+    username = result.get("username")
+    print(f"[用户查询] 成功 - 设备ID {jabobo_id} 对应用户名：{username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    return username
+
+@router.post("/user/generate-rag-prompt")
+async def generate_rag_prompt(
+    jabobo_id: str = Query(..., description="设备ID（洁宝宝ID）"),
+    question: str = Query(..., description="用户问题")
+):
+    """根据设备ID和用户问题，调用build_rag_prompt_from_vector_file生成RAG提示词（无需身份验证）"""
+    print(f"\n===== 开始处理RAG提示词生成请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[请求信息] 设备ID：{jabobo_id} | 用户问题：{question[:50]}...")
+    
+    try:
+        # 1. 根据设备ID查询对应的用户名（捕获用户不存在异常并自定义提示）
+        try:
+            username = get_username_by_jabobo_id(jabobo_id)
+        except HTTPException as e:
+            if e.status_code == 404:
+                print(f"[用户查询] 失败 - 设备ID {jabobo_id} 对应的用户不存在")
+                raise HTTPException(status_code=404, detail="用户不存在")
+            raise  # 其他HTTP异常正常抛出
+        
+        # 2. 构建向量文件路径（使用查询到的真实用户名）
+        pkl_target_dir = os.path.join(BASE_DATA_DIR, username, jabobo_id,"pkl_file")
+        pkl_path = os.path.join(pkl_target_dir,"kb.pkl")
+        print(f"\n[路径构建] 向量文件路径：{pkl_path}")
+        
+        # 3. 检查向量文件是否存在（自定义提示语：未构建知识库）
+        if not os.path.exists(pkl_path):
+            print(f"[文件检查] 失败 - 向量文件不存在：{pkl_path}")
+            raise HTTPException(status_code=404, detail="未构建知识库")
+        print(f"[文件检查] 通过 - 向量文件存在")
+        
+        # 4. 调用函数生成RAG提示词
+        print(f"\n[提示词生成] 开始调用build_rag_prompt_from_vector_file")
+        rag_prompt = build_rag_prompt_from_vector_file(question, pkl_path)  # 适配函数参数
+        print(f"[提示词生成] 成功 - 生成的提示词长度：{len(rag_prompt)} 字符")
+        
+        print(f"\n[生成完成] 成功 - 设备ID：{jabobo_id} | 用户名：{username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"===== RAG提示词生成请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        # 返回生成结果
+        return {
+            "success": True,
+            "jabobo_id": jabobo_id,
+            "username": username,
+            "question": question,
+            "rag_prompt": rag_prompt,
+            "message": "RAG提示词生成成功"
+        }
+    
+    except HTTPException:
+        # 捕获业务异常（如404用户不存在/未构建知识库）直接抛出
+        raise
+    except Exception as e:
+        # 捕获系统异常，打印日志并返回500
+        print(f"\n[生成异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        raise HTTPException(status_code=500, detail=f"生成RAG提示词失败：{str(e)}")
+    finally:
+        # 释放数据库连接（查询用户名时占用的连接）
+        print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        try:
+            db.close()
+            print(f"[资源释放] 数据库连接已关闭\n")
+        except:
+            print(f"[资源释放] 无数据库连接需关闭\n")
