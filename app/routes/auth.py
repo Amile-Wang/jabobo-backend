@@ -14,51 +14,131 @@ CLIENT_TOKEN_MAP = {
     "ios": "ios_token"
 }
 
+import uuid
+from fastapi import APIRouter, HTTPException, Depends, Header
+from app.models.user import LoginRequest
+from app.database import db
+from app.utils.security import verify_password
+from app.routes.users import get_current_user
+
+router = APIRouter()
+
+# 核心映射：客户端类型 → 对应token字段
+CLIENT_TOKEN_MAP = {
+    "web": "web_token",
+    "android": "android_token",
+    "ios": "ios_token"
+}
+
 @router.post("/login")
 async def login(req: LoginRequest):
+    # ====================== 第一步：打印请求全量信息 ======================
+    print("\n" + "="*50)
+    print("📲 登录请求接收开始")
+    print("="*50)
+    print(f"请求体原始数据：{req.dict()}")
+    print(f"用户名：{req.username}")
+    print(f"密码（密文校验前）：{req.password[:6]}****")  # 隐藏密码大部分字符
+    print(f"前端传的client_type：{getattr(req, 'client_type', '未传')}")
+    print(f"client_type类型：{type(getattr(req, 'client_type', None))}")
+
     # 1. 数据库连接校验
-    if not db.connect():
+    print("\n🔌 数据库连接校验")
+    db_connected = db.connect()
+    print(f"数据库连接结果：{db_connected}")
+    if not db_connected:
         raise HTTPException(status_code=500, detail="数据库连接失败")
     
     try:
         # 2. 查询用户是否存在
+        print("\n👤 查询用户信息")
         user = db.query_user(req.username)
+        print(f"用户查询结果：{user if user else '用户不存在'}")
         if not user:
+            print("❌ 用户名不存在，抛出401")
             raise HTTPException(status_code=401, detail="用户名或密码错误")
         
         # 3. 校验密码
-        if not verify_password(req.password, user['password']):
+        print("\n🔐 密码校验")
+        password_valid = verify_password(req.password, user['password'])
+        print(f"密码校验结果：{password_valid}")
+        if not password_valid:
+            print("❌ 密码错误，抛出401")
             raise HTTPException(status_code=401, detail="用户名或密码错误")
         
-        # 4. 生成当前客户端专属token（不同端生成不同token）
+        # ========== 核心：客户端类型处理（带详细日志） ==========
+        print("\n📱 客户端类型处理")
+        # 获取client_type（兼容各种情况）
+        raw_client_type = getattr(req, "client_type", "web")
+        print(f"原始client_type：{raw_client_type}")
+        
+        # 转小写 + 处理可能的None/空值
+        client_type_lower = raw_client_type.lower() if raw_client_type and raw_client_type != "" else "web"
+        print(f"转小写后client_type：{client_type_lower}")
+        
+        # 匹配token字段
+        token_field = CLIENT_TOKEN_MAP.get(client_type_lower, "web_token")
+        print(f"匹配的token字段：{token_field}（映射表：{CLIENT_TOKEN_MAP}）")
+        
+        # 4. 生成当前客户端专属token
+        print("\n🔑 生成专属token")
         token = str(uuid.uuid4())
-        # 获取当前客户端对应的token字段（默认web）
-        token_field = CLIENT_TOKEN_MAP.get(req.client_type.value, "web_token")
+        print(f"生成的token：{token}")
         
-        # 5. 更新数据库：仅更新当前端的token，不覆盖其他端
-        update_sql = f"UPDATE user_login SET {token_field} = %s, client_type = %s WHERE username = %s"
-        db.cursor.execute(update_sql, (token, req.client_type.value, user['username']))
+        # 5. 数据库更新操作（带SQL日志）
+        print("\n🗄️ 数据库更新操作")
+        update_sql = f"UPDATE user_login SET {token_field} = %s WHERE username = %s"
+        print(f"更新SQL：{update_sql}")
+        print(f"SQL参数：token={token}, username={user['username']}")
         
-        # 6. 提交事务（关键：确保数据写入）
-        db.cursor.connection.commit()
+        # 执行更新
+        db.cursor.execute(update_sql, (token, user['username']))
+        affected_rows = db.cursor.rowcount
+        print(f"SQL执行影响行数：{affected_rows}")
         
-        # 7. 返回结果（包含客户端类型）
+        # 6. 提交事务（带验证）
+        print("\n✅ 提交数据库事务")
+        try:
+            db.cursor.connection.commit()
+            print("事务提交成功")
+        except Exception as e:
+            print(f"❌ 事务提交失败：{str(e)}")
+            raise
+        
+        # 7. 验证更新结果（关键：查询数据库确认）
+        print("\n🔍 验证数据库更新结果")
+        db.cursor.execute(f"SELECT username, web_token, android_token, ios_token FROM user_login WHERE username = %s", (user['username'],))
+        updated_user = db.cursor.fetchone()
+        print(f"更新后用户token信息：{updated_user}")
+        
+        # 8. 返回结果
+        print("\n📤 登录成功，返回结果")
         return {
             "success": True,
             "username": user['username'],
             "role": user['role'],
             "token": token,
-            "client_type": req.client_type.value
+            "client_type": client_type_lower,
+            "token_field_updated": token_field,
+            "database_updated_verify": {  # 新增：返回数据库更新后的token值，便于前端验证
+                "web_token": updated_user.get("web_token"),
+                "android_token": updated_user.get("android_token"),
+                "ios_token": updated_user.get("ios_token")
+            }
         }
     
-    except HTTPException:
-        # 放行已定义的401/500异常
+    except HTTPException as he:
+        print(f"\n❌ 业务异常：{he.status_code} - {he.detail}")
         raise
     except Exception as e:
+        print(f"\n🔥 系统异常：{str(e)}")
         raise HTTPException(status_code=500, detail=f"登录处理失败：{str(e)}")
     finally:
-        # 确保数据库连接最终关闭
+        print("\n🔌 关闭数据库连接")
         db.close()
+        print("="*50)
+        print("📲 登录请求处理结束")
+        print("="*50 + "\n")
 
 @router.post("/logout")
 async def logout(current_user: dict = Depends(get_current_user)):
