@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, Header, Query, Body
 from app.database import db, unactivated_macs, activation_codes
 import json
-
+from app.utils.security import verify_user
 router = APIRouter()
 
-# --- 辅助函数：统一身份验证 ---
-def verify_user(x_username, authorization):
-    db.cursor.execute("SELECT session_token FROM user_login WHERE username = %s", (x_username,))
-    user = db.cursor.fetchone()
-    if not user or user.get('session_token') != authorization:
-        raise HTTPException(status_code=401, detail="身份验证失败")
-    return user
+# 核心映射：客户端类型 → 对应token字段（默认取web）
+CLIENT_TOKEN_MAP = {
+    "web": "web_token",
+    "android": "android_token",
+    "ios": "ios_token"
+}
+
 
 # 1. 获取 ID 列表接口
 @router.get("/user/jabobo_ids")
@@ -18,7 +18,8 @@ async def get_user_jabobo_ids(
     x_username: str = Header(...), 
     authorization: str = Header(...)
 ):
-    if not db.connect(): raise HTTPException(status_code=500)
+    if not db.connect(): 
+        raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
         verify_user(x_username, authorization)
         # 查询该用户绑定的所有设备
@@ -38,7 +39,8 @@ async def bind_jabobo(
     authorization: str = Header(...)
 ):
     jabobo_id = payload.get("jabobo_id")
-    if not jabobo_id: raise HTTPException(status_code=400, detail="缺少设备 ID")
+    if not jabobo_id: 
+        raise HTTPException(status_code=400, detail="缺少设备 ID")
     
     # 优化绑定流程：检查是否为配对码，如果是则使用对应的MAC地址
     if jabobo_id in activation_codes:
@@ -47,12 +49,12 @@ async def bind_jabobo(
         jabobo_id = unactivated_macs[activation_code_index]
         print(f"🔑 [ACTIVATION] Pairing code {jabobo_id} matched MAC address {jabobo_id}")
 
-
-    if not db.connect(): raise HTTPException(status_code=500)
+    if not db.connect(): 
+        raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
         verify_user(x_username, authorization)
 
-        # 👈 修复之前的报错：不查询不存在的 'id' 列，直接查 jabobo_id
+        # 检查设备是否已绑定
         db.cursor.execute(
             "SELECT jabobo_id FROM user_personas WHERE username = %s AND jabobo_id = %s",
             (x_username, jabobo_id)
@@ -64,6 +66,8 @@ async def bind_jabobo(
         default_persona = json.dumps([{"id": "p1", "name": "默认人设", "content": "你好，我是新绑定的捷宝宝。"}])
         sql = "INSERT INTO user_personas (username, jabobo_id, personas, memory) VALUES (%s, %s, %s, %s)"
         db.cursor.execute(sql, (x_username, jabobo_id, default_persona, "尚无记忆"))
+        # 提交事务（新增：确保数据写入）
+        db.cursor.connection.commit()
         
         print(f"✨ [BIND] User: {x_username} | New Device: {jabobo_id}")
         return {"success": True, "message": "绑定成功"}
@@ -77,12 +81,15 @@ async def unbind_jabobo(
     x_username: str = Header(...), 
     authorization: str = Header(...)
 ):
-    if not db.connect(): raise HTTPException(status_code=500)
+    if not db.connect(): 
+        raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
         verify_user(x_username, authorization)
         
         sql = "DELETE FROM user_personas WHERE username = %s AND jabobo_id = %s"
         db.cursor.execute(sql, (x_username, jabobo_id))
+        # 提交事务（新增）
+        db.cursor.connection.commit()
         
         if db.cursor.rowcount == 0:
             return {"success": False, "message": "未找到该设备或无权操作"}
@@ -102,7 +109,8 @@ async def get_user_config(
     if not jabobo_id:
         return {"success": True, "data": {"persona": "[]", "memory": ""}}
 
-    if not db.connect(): raise HTTPException(status_code=500)
+    if not db.connect(): 
+        raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
         verify_user(x_username, authorization)
 
@@ -125,6 +133,8 @@ async def get_user_config(
         }
     finally:
         db.close()
+
+# 5. 设备换绑接口
 @router.put("/user/rebind")
 async def rebind_jabobo(
     payload: dict = Body(...),
@@ -137,7 +147,8 @@ async def rebind_jabobo(
     if not old_id or not new_id:
         raise HTTPException(status_code=400, detail="缺少旧设备或新设备 ID")
 
-    if not db.connect(): raise HTTPException(status_code=500)
+    if not db.connect(): 
+        raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
         verify_user(x_username, authorization)
 
@@ -157,6 +168,8 @@ async def rebind_jabobo(
             WHERE username = %s AND jabobo_id = %s
         """
         db.cursor.execute(sql, (new_id, x_username, old_id))
+        # 提交事务（新增）
+        db.cursor.connection.commit()
         
         if db.cursor.rowcount == 0:
             return {"success": False, "message": "原设备不存在或无权操作"}

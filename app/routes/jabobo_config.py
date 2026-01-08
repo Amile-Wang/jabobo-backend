@@ -1,19 +1,13 @@
-from fastapi import APIRouter, HTTPException, Header, Query
+from fastapi import APIRouter, HTTPException, Header, Query, Body
 from app.database import db
 import json
 from datetime import datetime
+# 已导入的核心函数
+from app.utils.security import get_valid_cursor, verify_user
 
 router = APIRouter()
 
-# --- 游标修复函数 ---
-def get_valid_cursor():
-    if not db.connect():
-        raise HTTPException(status_code=500, detail="数据库连接失败")
-    if hasattr(db.cursor, 'closed') and db.cursor.closed:
-        db.cursor = db.connection.cursor(db.connection.cursor.DictCursor)
-    return db.cursor
-
-# 2. 获取【特定设备】的配置（核心修改：返回字符串格式的persona）
+# 2. 获取【特定设备】的配置（核心修改：调用verify_user替换旧校验）
 @router.get("/user/config")
 async def get_user_config(
     jabobo_id: str = Query(...), 
@@ -26,15 +20,15 @@ async def get_user_config(
         db_connected = db.connect()
         if not db_connected:
             raise HTTPException(status_code=500, detail="数据库连接失败")
+        
+        # ========== 核心修改：调用verify_user进行多端token校验 ==========
+        # 替换原来的session_token查询校验逻辑
+        verify_user(x_username, authorization)
+        
+        # 2. 获取有效游标
         cursor = get_valid_cursor()
 
-        # 2. 身份验证
-        cursor.execute("SELECT session_token FROM user_login WHERE username = %s", (x_username,))
-        user = cursor.fetchone()
-        if not user or user.get('session_token') != authorization:
-            raise HTTPException(status_code=401, detail="身份验证失败")
-
-        # 3. 查询配置
+        # 3. 查询配置（业务逻辑保持不变）
         sql = "SELECT personas, memory FROM user_personas WHERE username = %s AND jabobo_id = %s"
         cursor.execute(sql, (x_username, jabobo_id))
         config = cursor.fetchone()
@@ -55,8 +49,7 @@ async def get_user_config(
         persona_str = raw_persona.strip()
         memory_str = memory_data.strip()
 
-        # ========== 核心修改：不再解析JSON，直接返回字符串 ==========
-        # 目的：适配前端已有的 JSON.parse() 逻辑
+        # 核心：返回字符串格式（适配前端JSON.parse）
         final_persona = persona_str if persona_str else "[]"
 
         # 日志
@@ -73,7 +66,6 @@ async def get_user_config(
         return {
             "success": True, 
             "data": {
-                # 关键：返回字符串（前端会用JSON.parse解析）
                 "persona": final_persona,  
                 "memory": memory_str,
                 "voice_status": "已就绪",
@@ -94,10 +86,10 @@ async def get_user_config(
             except:
                 pass
 
-# 3. 同步【特定设备】的配置（保持不变，兼容前端传入的JSON字符串）
+# 3. 同步【特定设备】的配置（同样替换为verify_user校验）
 @router.post("/user/sync-config")
 async def sync_config(
-    payload: dict, 
+    payload: dict = Body(...), 
     x_username: str = Header(...), 
     authorization: str = Header(...)
 ):
@@ -107,15 +99,14 @@ async def sync_config(
         db_connected = db.connect()
         if not db_connected:
             raise HTTPException(status_code=500, detail="数据库连接失败")
+        
+        # ========== 核心修改：调用verify_user进行多端token校验 ==========
+        verify_user(x_username, authorization)
+        
+        # 2. 获取有效游标
         cursor = get_valid_cursor()
 
-        # 2. 身份验证
-        cursor.execute("SELECT session_token FROM user_login WHERE username = %s", (x_username,))
-        user = cursor.fetchone()
-        if not user or user.get('session_token') != authorization:
-            raise HTTPException(status_code=401, detail="身份验证失败")
-
-        # 3. 参数解析 + 严格校验
+        # 3. 参数解析 + 严格校验（业务逻辑保持不变）
         jabobo_id = payload.get('jabobo_id', '').strip()
         persona_json = payload.get('persona', '[]') if payload.get('persona') is not None else '[]'
         memory = payload.get('memory', '') if payload.get('memory') is not None else ''
@@ -151,6 +142,8 @@ async def sync_config(
             ON DUPLICATE KEY UPDATE personas = VALUES(personas), memory = VALUES(memory)
         """
         cursor.execute(sql, (x_username, jabobo_id, persona_json, memory))
+        # 提交事务（确保数据写入）
+        db.connection.commit()
         
         print(f"✅ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - [DATABASE UPDATED] Target: {x_username} / {jabobo_id}")
         

@@ -5,52 +5,9 @@ import os
 import shutil
 from typing import List, Optional
 from datetime import datetime  # 处理时间戳
+from app.utils.security import verify_user, get_valid_cursor
 
 router = APIRouter()
-
-# --- 新增：游标修复辅助函数 ---
-def get_valid_cursor():
-    """确保游标可用，若已关闭则重新创建"""
-    print(f"\n[数据库游标检查] 开始检查游标状态 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    # 1. 确保数据库连接已建立
-    if not db.connect():
-        print("[数据库游标检查] 数据库连接失败！")
-        raise HTTPException(status_code=500, detail="数据库连接失败")
-    print("[数据库游标检查] 数据库连接已建立")
-    
-    # 2. 检查游标是否关闭，若关闭则重新创建
-    cursor_closed = hasattr(db.cursor, 'closed') and db.cursor.closed
-    print(f"[数据库游标检查] 游标当前状态：{'已关闭' if cursor_closed else '正常'}")
-    if cursor_closed:
-        # 重新创建DictCursor
-        db.cursor = db.connection.cursor(db.connection.cursor.DictCursor)
-        print("[数据库游标检查] 已重新创建游标")
-    
-    print(f"[数据库游标检查] 游标检查完成 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    return db.cursor
-
-# --- 辅助函数：统一身份验证（保留，供查询/删除接口使用）---
-def verify_user(x_username, authorization):
-    print(f"\n[身份验证] 开始验证用户 - 用户名：{x_username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    # 修复：先获取有效游标
-    cursor = get_valid_cursor()
-    
-    # 执行查询
-    print(f"[身份验证] 执行SQL：SELECT session_token FROM user_login WHERE username = '{x_username}'")
-    cursor.execute("SELECT session_token FROM user_login WHERE username = %s", (x_username,))
-    user = cursor.fetchone()
-    print(f"[身份验证] 查询结果：{user}")
-    
-    # 验证逻辑
-    if not user:
-        print(f"[身份验证] 失败 - 用户 {x_username} 不存在 | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        raise HTTPException(status_code=401, detail="身份验证失败")
-    if user.get('session_token') != authorization:
-        print(f"[身份验证] 失败 - Token不匹配 | 数据库Token：{user.get('session_token')[:10]}... | 请求Token：{authorization[:10]}...")
-        raise HTTPException(status_code=401, detail="身份验证失败")
-    
-    print(f"[身份验证] 成功 - 用户名：{x_username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    return user
 
 def get_username_by_jabobo_id(jabobo_id: str):
     """根据设备ID查询对应的用户名，适配联合主键"""

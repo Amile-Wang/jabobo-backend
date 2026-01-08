@@ -5,60 +5,17 @@ import os
 import shutil
 from typing import List
 from datetime import datetime  # 处理时间戳
-from app.utils.rag import generate_vector_from_txt_folder,build_rag_prompt_from_vector_file
+from app.utils.rag import generate_vector_from_txt_folder, build_rag_prompt_from_vector_file
 # 全局Router（仅定义一次）
 router = APIRouter()
-
-# --- 新增：游标修复辅助函数 ---
-def get_valid_cursor():
-    """确保游标可用，若已关闭则重新创建"""
-    print(f"\n[数据库游标检查] 开始检查游标状态 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    # 1. 确保数据库连接已建立
-    if not db.connect():
-        print("[数据库游标检查] 数据库连接失败！")
-        raise HTTPException(status_code=500, detail="数据库连接失败")
-    print("[数据库游标检查] 数据库连接已建立")
-    
-    # 2. 检查游标是否关闭，若关闭则重新创建
-    cursor_closed = hasattr(db.cursor, 'closed') and db.cursor.closed
-    print(f"[数据库游标检查] 游标当前状态：{'已关闭' if cursor_closed else '正常'}")
-    if cursor_closed:
-        # 重新创建DictCursor
-        db.cursor = db.connection.cursor(db.connection.cursor.DictCursor)
-        print("[数据库游标检查] 已重新创建游标")
-    
-    print(f"[数据库游标检查] 游标检查完成 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    return db.cursor
-
-# --- 辅助函数：统一身份验证 ---
-def verify_user(x_username, authorization):
-    print(f"\n[身份验证] 开始验证用户 - 用户名：{x_username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    # 修复：先获取有效游标
-    cursor = get_valid_cursor()
-    
-    # 执行查询
-    print(f"[身份验证] 执行SQL：SELECT session_token FROM user_login WHERE username = '{x_username}'")
-    cursor.execute("SELECT session_token FROM user_login WHERE username = %s", (x_username,))
-    user = cursor.fetchone()
-    print(f"[身份验证] 查询结果：{user}")
-    
-    # 验证逻辑
-    if not user:
-        print(f"[身份验证] 失败 - 用户 {x_username} 不存在 | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        raise HTTPException(status_code=401, detail="身份验证失败")
-    if user.get('session_token') != authorization:
-        print(f"[身份验证] 失败 - Token不匹配 | 数据库Token：{user.get('session_token')[:10]}... | 请求Token：{authorization[:10]}...")
-        raise HTTPException(status_code=401, detail="身份验证失败")
-    
-    print(f"[身份验证] 成功 - 用户名：{x_username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    return user
+from app.utils.security import verify_user, get_valid_cursor
 
 # 配置常量
 ALLOWED_EXTENSIONS = {".pdf", ".txt"}
 MAX_FILE_SIZE = 30 * 1024 * 1024  # 30MB
 BASE_DATA_DIR = "./data"
 
-# --- 上传接口（新增详细打印）---
+# --- 上传接口（修复游标+事务提交）---
 @router.post("/user/upload-kb")
 async def upload_knowledge_base(
     jabobo_id: str = Form(...),
@@ -69,7 +26,7 @@ async def upload_knowledge_base(
     print(f"\n===== 开始处理文件上传请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"[请求信息] 用户名：{x_username} | 设备ID：{jabobo_id} | 文件名：{file.filename}")
     
-    # 验证用户权限
+    # 验证用户权限（内部已处理游标）
     verify_user(x_username, authorization)
     
     # 1. 校验文件后缀
@@ -109,6 +66,7 @@ async def upload_knowledge_base(
     file_path = os.path.abspath(file_path)
     print(f"\n[文件存储] 目标文件路径：{file_path}")
     
+    db_connected = False
     try:
         # 保存文件到本地
         print(f"[文件存储] 开始写入文件 - 文件名：{file.filename} | 路径：{file_path}")
@@ -116,9 +74,11 @@ async def upload_knowledge_base(
             shutil.copyfileobj(file.file, buffer)
         print(f"[文件存储] 文件写入完成 - 实际文件大小：{os.path.getsize(file_path)} 字节")
         generate_vector_from_txt_folder(target_dir,os.path.join(pkl_target_dir,"kb.pkl"))
+        
         # 5. 数据库操作
         print(f"\n[数据库操作] 开始处理数据库逻辑")
-        if not db.connect():
+        db_connected = db.connect()
+        if not db_connected:
             print(f"[数据库操作] 失败 - 数据库连接失败")
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
@@ -173,6 +133,10 @@ async def upload_knowledge_base(
         print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({x_username}, {jabobo_id}, {kb_status_json[:100]}...)")
         cursor.execute(upsert_sql, (x_username, jabobo_id, kb_status_json))
         
+        # 核心修复：提交事务
+        db.connection.commit()
+        print(f"[数据库操作] 事务提交成功")
+        
         print(f"\n[上传完成] 成功 - 文件路径：{file_path} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"===== 上传请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         return {
@@ -184,7 +148,7 @@ async def upload_knowledge_base(
     
     except Exception as e:
         print(f"\n[上传异常] 失败 - 异常信息：{str(e)} | 堆栈：{e.__traceback__} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        if db.connection:
+        if db_connected and db.connection:
             try:
                 print(f"[数据库回滚] 开始回滚事务")
                 db.connection.rollback()
@@ -194,10 +158,17 @@ async def upload_knowledge_base(
         raise HTTPException(status_code=500, detail=f"文件保存异常: {str(e)}")
     finally:
         print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        db.close()
+        if db_connected and db.connection:
+            try:
+                # 先关闭游标再关闭连接
+                if hasattr(db, 'cursor') and db.cursor:
+                    db.cursor.close()
+                db.close()
+            except Exception as close_e:
+                print(f"[资源释放] 关闭连接失败：{str(close_e)}")
         print(f"[资源释放] 数据库连接已关闭\n")
 
-# --- 查询列表接口（新增详细打印）---
+# --- 查询列表接口（修复游标+连接管理）---
 @router.get("/user/list-kb")
 async def list_knowledge_base(
     jabobo_id: str = Query(..., description="设备ID"),
@@ -207,12 +178,14 @@ async def list_knowledge_base(
     print(f"\n===== 开始处理知识库查询请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"[请求信息] 用户名：{x_username} | 设备ID：{jabobo_id}")
     
-    # 身份验证
+    # 身份验证（内部已处理游标）
     verify_user(x_username, authorization)
     
+    db_connected = False
     try:
         print(f"\n[数据库操作] 开始查询知识库列表")
-        if not db.connect():
+        db_connected = db.connect()
+        if not db_connected:
             print(f"[数据库操作] 失败 - 数据库连接失败")
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
@@ -285,7 +258,7 @@ async def list_knowledge_base(
         }
     except Exception as e:
         print(f"\n[查询异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        if db.connection:
+        if db_connected and db.connection:
             try:
                 db.connection.rollback()
             except:
@@ -293,10 +266,16 @@ async def list_knowledge_base(
         raise HTTPException(status_code=500, detail=f"查询知识库列表失败：{str(e)}")
     finally:
         print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        db.close()
+        if db_connected and db.connection:
+            try:
+                if hasattr(db, 'cursor') and db.cursor:
+                    db.cursor.close()
+                db.close()
+            except Exception as close_e:
+                print(f"[资源释放] 关闭连接失败：{str(close_e)}")
         print(f"[资源释放] 数据库连接已关闭\n")
 
-# --- 删除接口（新增详细打印）---
+# --- 删除接口（修复游标+事务提交）---
 @router.delete("/user/delete-kb")
 async def delete_knowledge_base(
     jabobo_id: str = Query(..., description="设备ID"),
@@ -318,11 +297,13 @@ async def delete_knowledge_base(
         raise HTTPException(status_code=403, detail="无权删除该文件（路径不属于当前用户）")
     print(f"[权限校验] 通过")
     
+    db_connected = False
     try:
         # 3. 数据库操作：查询用户知识库记录，确认文件是否在用户的知识库列表中
         print(f"\n[数据库操作] 开始查询知识库记录")
         # 检查数据库连接状态
-        if not db.connect():
+        db_connected = db.connect()
+        if not db_connected:
             print(f"[数据库操作] 失败 - 数据库连接失败")
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
@@ -391,9 +372,9 @@ async def delete_knowledge_base(
         print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({x_username}, {jabobo_id}, {kb_status_json[:100]}...)")
         cursor.execute(upsert_sql, (x_username, jabobo_id, kb_status_json))
         
-        # 打印删除完成日志
-        print(f"\n[删除完成] 成功 - 删除文件路径：{file_path} | 剩余记录数：{len(kb_path_list)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"===== 删除请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        # 核心修复：提交事务
+        db.connection.commit()
+        print(f"[数据库操作] 事务提交成功")
         
         # 8. 向量文件处理：删除文件后检查知识库目录是否为空，更新向量文件
         # 构建知识库目录和向量文件目录路径
@@ -413,6 +394,10 @@ async def delete_knowledge_base(
             # 知识库目录有文件：重新生成向量文件
             generate_vector_from_txt_folder(target_dir, pkl_path)
                 
+        # 打印删除完成日志
+        print(f"\n[删除完成] 成功 - 删除文件路径：{file_path} | 剩余记录数：{len(kb_path_list)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"===== 删除请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         # 返回删除成功结果
         return {
             "success": True,
@@ -424,9 +409,8 @@ async def delete_knowledge_base(
         # 捕获业务异常（如403/404），直接抛出不处理
         raise
     except Exception as e:
-        # 捕获系统异常，打印错误日志并回滚数据库
         print(f"\n[删除异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        if db.connection:
+        if db_connected and db.connection:
             try:
                 print(f"[数据库回滚] 开始回滚事务")
                 db.connection.rollback()
@@ -438,7 +422,13 @@ async def delete_knowledge_base(
     finally:
         # 最终操作：无论成功/失败，都关闭数据库连接释放资源
         print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        db.close()
+        if db_connected and db.connection:
+            try:
+                if hasattr(db, 'cursor') and db.cursor:
+                    db.cursor.close()
+                db.close()
+            except Exception as close_e:
+                print(f"[资源释放] 关闭连接失败：{str(close_e)}")
         print(f"[资源释放] 数据库连接已关闭\n")
 
 
@@ -446,23 +436,32 @@ def get_username_by_jabobo_id(jabobo_id: str):
     """根据设备ID查询对应的用户名，适配联合主键"""
     print(f"\n[用户查询] 开始通过设备ID查询用户名 - jabobo_id：{jabobo_id} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
+    # 先确保数据库连接
+    if not db.connect():
+        raise HTTPException(status_code=500, detail="数据库连接失败")
+    
     # 获取有效游标
     cursor = get_valid_cursor()
     
-    # 执行查询（核心：通过jabobo_id查username）
-    query_sql = "SELECT username FROM user_personas WHERE jabobo_id = %s LIMIT 1"
-    print(f"[用户查询] 执行SQL：{query_sql} | 参数：({jabobo_id})")
-    cursor.execute(query_sql, (jabobo_id,))
-    result = cursor.fetchone()
-    
-    # 校验查询结果
-    if not result or not result.get("username"):
-        print(f"[用户查询] 失败 - 未找到设备ID {jabobo_id} 对应的用户 | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        raise HTTPException(status_code=404, detail=f"未找到设备ID {jabobo_id} 对应的用户记录")
-    
-    username = result.get("username")
-    print(f"[用户查询] 成功 - 设备ID {jabobo_id} 对应用户名：{username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    return username
+    try:
+        # 执行查询（核心：通过jabobo_id查username）
+        query_sql = "SELECT username FROM user_personas WHERE jabobo_id = %s LIMIT 1"
+        print(f"[用户查询] 执行SQL：{query_sql} | 参数：({jabobo_id})")
+        cursor.execute(query_sql, (jabobo_id,))
+        result = cursor.fetchone()
+        
+        # 校验查询结果
+        if not result or not result.get("username"):
+            print(f"[用户查询] 失败 - 未找到设备ID {jabobo_id} 对应的用户 | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            raise HTTPException(status_code=404, detail=f"未找到设备ID {jabobo_id} 对应的用户记录")
+        
+        username = result.get("username")
+        print(f"[用户查询] 成功 - 设备ID {jabobo_id} 对应用户名：{username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        return username
+    finally:
+        # 关闭游标（不关闭连接，留给外层处理）
+        if cursor:
+            cursor.close()
 
 @router.post("/user/generate-rag-prompt")
 async def generate_rag_prompt(
@@ -473,8 +472,14 @@ async def generate_rag_prompt(
     print(f"\n===== 开始处理RAG提示词生成请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"[请求信息] 设备ID：{jabobo_id} | 用户问题：{question[:50]}...")
     
+    db_connected = False
     try:
-        # 1. 根据设备ID查询对应的用户名（捕获用户不存在异常并自定义提示）
+        # 1. 确保数据库连接
+        db_connected = db.connect()
+        if not db_connected:
+            raise HTTPException(status_code=500, detail="数据库连接失败")
+        
+        # 2. 根据设备ID查询对应的用户名（捕获用户不存在异常并自定义提示）
         try:
             username = get_username_by_jabobo_id(jabobo_id)
         except HTTPException as e:
@@ -483,18 +488,18 @@ async def generate_rag_prompt(
                 raise HTTPException(status_code=404, detail="用户不存在")
             raise  # 其他HTTP异常正常抛出
         
-        # 2. 构建向量文件路径（使用查询到的真实用户名）
+        # 3. 构建向量文件路径（使用查询到的真实用户名）
         pkl_target_dir = os.path.join(BASE_DATA_DIR, username, jabobo_id,"pkl_file")
         pkl_path = os.path.join(pkl_target_dir,"kb.pkl")
         print(f"\n[路径构建] 向量文件路径：{pkl_path}")
         
-        # 3. 检查向量文件是否存在（自定义提示语：未构建知识库）
+        # 4. 检查向量文件是否存在（自定义提示语：未构建知识库）
         if not os.path.exists(pkl_path):
             print(f"[文件检查] 失败 - 向量文件不存在：{pkl_path}")
             raise HTTPException(status_code=404, detail="未构建知识库")
         print(f"[文件检查] 通过 - 向量文件存在")
         
-        # 4. 调用函数生成RAG提示词
+        # 5. 调用函数生成RAG提示词
         print(f"\n[提示词生成] 开始调用build_rag_prompt_from_vector_file")
         rag_prompt = build_rag_prompt_from_vector_file(question, pkl_path)  # 适配函数参数
         print(f"[提示词生成] 成功 - 生成的提示词长度：{len(rag_prompt)} 字符")
@@ -522,8 +527,11 @@ async def generate_rag_prompt(
     finally:
         # 释放数据库连接（查询用户名时占用的连接）
         print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        try:
-            db.close()
-            print(f"[资源释放] 数据库连接已关闭\n")
-        except:
-            print(f"[资源释放] 无数据库连接需关闭\n")
+        if db_connected and db.connection:
+            try:
+                if hasattr(db, 'cursor') and db.cursor:
+                    db.cursor.close()
+                db.close()
+                print(f"[资源释放] 数据库连接已关闭\n")
+            except Exception as close_e:
+                print(f"[资源释放] 关闭连接失败：{str(close_e)}\n")
