@@ -115,9 +115,19 @@ async def sync_config(
         if not jabobo_id:
             print(f"❌ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Missing jabobo_id in payload!")
             raise HTTPException(status_code=400, detail="缺少 jabobo_id")
-        if len(jabobo_id) != 17 or jabobo_id.count(':') != 5:
+        
+        # ========== 核心修改：支持MAC格式和6位纯数字格式 ==========
+        # 定义两种合法格式的校验条件
+        is_mac_format = len(jabobo_id) == 17 and jabobo_id.count(':') == 5
+        is_6digit_format = len(jabobo_id) == 6 and jabobo_id.isdigit()
+        
+        # 既不是MAC格式也不是6位纯数字，判定为非法
+        if not (is_mac_format or is_6digit_format):
             print(f"⚠️ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - 非法设备ID：{jabobo_id}")
-            raise HTTPException(status_code=400, detail="设备ID格式非法（应为xx:xx:xx:xx:xx:xx）")
+            raise HTTPException(
+                status_code=400,
+                detail="设备ID格式非法（应为xx:xx:xx:xx:xx:xx或6位纯数字）"
+            )
 
         # 校验JSON（确保前端传入的是合法JSON字符串）
         try:
