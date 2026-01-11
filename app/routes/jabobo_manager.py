@@ -42,12 +42,20 @@ async def bind_jabobo(
     if not jabobo_id: 
         raise HTTPException(status_code=400, detail="缺少设备 ID")
     
-    # 优化绑定流程：检查是否为配对码，如果是则使用对应的MAC地址
-    if jabobo_id in activation_codes:
-        # 根据配对码找到对应的MAC地址
+    # 新增：定义合法设备ID的判断逻辑（MAC地址格式/激活码）
+    is_activation_code = jabobo_id in activation_codes
+    # 假设MAC地址是12位十六进制字符串（可根据实际格式调整）
+    is_valid_mac = len(jabobo_id.strip()) == 17 and jabobo_id.count(':') == 5 and all(c in '0123456789abcdefABCDEF:' for c in jabobo_id.strip())
+    
+    # 场景1：是激活码 → 转换为MAC地址
+    if is_activation_code:
         activation_code_index = activation_codes.index(jabobo_id)
         jabobo_id = unactivated_macs[activation_code_index]
-        print(f"🔑 [ACTIVATION] Pairing code {jabobo_id} matched MAC address {jabobo_id}")
+        print(f"🔑 [ACTIVATION] Pairing code {payload.get('jabobo_id')} matched MAC address {jabobo_id}")
+    # 场景2：既不是激活码也不是合法MAC → 直接返回错误
+    elif not is_valid_mac:
+        print(f"❌ [BIND] Invalid device ID: {jabobo_id}")
+        raise HTTPException(status_code=400, detail="无效的设备ID！请输入正确的配对码或MAC地址")
 
     if not db.connect(): 
         raise HTTPException(status_code=500, detail="数据库连接失败")
@@ -66,7 +74,6 @@ async def bind_jabobo(
         default_persona = json.dumps([{"id": "p1", "name": "默认人设", "content": "你好，我是新绑定的捷宝宝。"}])
         sql = "INSERT INTO user_personas (username, jabobo_id, personas, memory) VALUES (%s, %s, %s, %s)"
         db.cursor.execute(sql, (x_username, jabobo_id, default_persona, "尚无记忆"))
-        # 提交事务（新增：确保数据写入）
         db.cursor.connection.commit()
         
         print(f"✨ [BIND] User: {x_username} | New Device: {jabobo_id}")
