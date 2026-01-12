@@ -11,11 +11,13 @@ import asyncio
 import aiohttp
 import time
 from dotenv import load_dotenv
+import hashlib  # 新增：用于生成hash
 
 load_dotenv()
 
 router = APIRouter()
-
+ALLOWED_AUDIO_EXTENSIONS = {".wav"}  # 音频允许的后缀（修复NameError）
+MAX_AUDIO_SIZE = 50 * 1024 * 1024    # 50MB 音频大小限制
 # 辅助函数：仅读取环境变量，不影响原格式
 def get_env(key: str) -> str:
     return os.getenv(key, "")
@@ -42,6 +44,89 @@ def get_username_by_jabobo_id(jabobo_id: str):
     username = result.get("username")
     print(f"[用户查询] 成功 - 设备ID {jabobo_id} 对应用户名：{username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     return username
+
+# 新增辅助函数：生成speaker_id
+def generate_speaker_id(jabobo_id: str, voiceprint_name: str) -> str:
+    """
+    通过jabobo_id + 声纹名称生成唯一的speaker_id
+    使用MD5 hash，确保唯一性和固定长度
+    """
+    # 拼接字符串并编码
+    combined_str = f"{jabobo_id}_{voiceprint_name}"
+    # 生成MD5 hash
+    speaker_id = hashlib.md5(combined_str.encode('utf-8')).hexdigest()
+    return speaker_id
+
+# 新增辅助函数：查询并校验声纹数量
+def check_voiceprint_limit(jabobo_id: str, max_limit: int = 10) -> List[dict]:
+    """
+    检查指定jabobo_id的声纹数量是否超过限制
+    返回当前声纹列表，若超过限制则抛出异常
+    """
+    cursor = get_valid_cursor()
+    
+    # 查询该设备的声纹记录
+    query_sql = "SELECT voiceprint_list FROM user_personas WHERE jabobo_id = %s LIMIT 1"
+    cursor.execute(query_sql, (jabobo_id,))
+    result = cursor.fetchone()
+    
+    # 解析声纹列表
+    voiceprint_list = []
+    if result and result.get("voiceprint_list") is not None:
+        try:
+            voiceprint_list = json.loads(result["voiceprint_list"])
+        except json.JSONDecodeError:
+            voiceprint_list = []
+    
+    # 检查数量限制
+    if len(voiceprint_list) >= max_limit:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"该设备ID({jabobo_id})的声纹数量已达上限({max_limit}个)，无法新增"
+        )
+    
+    return voiceprint_list
+
+# 新增辅助函数：保存声纹记录到数据库
+def save_voiceprint_record(jabobo_id: str, voiceprint_name: str, speaker_id: str, file_path: str):
+    """
+    将声纹名称、speaker_id、文件路径保存到数据库
+    """
+    # 先获取当前声纹列表并检查限制
+    voiceprint_list = check_voiceprint_limit(jabobo_id)
+    
+    # 构建新的声纹记录
+    new_voiceprint = {
+        "voiceprint_name": voiceprint_name,
+        "speaker_id": speaker_id,
+        "file_path": file_path,
+        "create_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "create_timestamp": datetime.now().timestamp()
+    }
+    
+    # 检查是否已存在同名声纹
+    for item in voiceprint_list:
+        if item.get("voiceprint_name") == voiceprint_name:
+            raise HTTPException(
+                status_code=400,
+                detail=f"该设备ID({jabobo_id})已存在名为{voiceprint_name}的声纹，请更换名称"
+            )
+    
+    # 添加新记录
+    voiceprint_list.append(new_voiceprint)
+    
+    # 更新数据库
+    voiceprint_json = json.dumps(voiceprint_list, ensure_ascii=False)
+    upsert_sql = """
+        INSERT INTO user_personas (jabobo_id, voiceprint_list)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE voiceprint_list = VALUES(voiceprint_list)
+    """
+    cursor = get_valid_cursor()
+    cursor.execute(upsert_sql, (jabobo_id, voiceprint_json))
+    db.connection.commit()
+    
+    return new_voiceprint
 
 # 配置常量 - 音频文件相关
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".ogg", ".flac", ".m4a"}  # 常见音频格式
@@ -257,7 +342,6 @@ async def report_chat_history(request: Request):
         
 # --- 上传音频接口（修改：先查用户再写入）---
 @router.post("/user/upload-audio")
-
 async def upload_audio_file(
     jabobo_id: str = Form(...),  # 仅保留设备ID作为标识
     file: UploadFile = File(...),
@@ -643,149 +727,286 @@ async def delete_audio_file(
         print(f"[资源释放] 数据库连接已关闭\n")
         
 @router.post("/voiceprint/register")
-async def voiceprint_register(
-    speaker_id: str = Form(..., description="说话人ID"),
-    file_path: str = Form(..., description="WAV音频文件的绝对路径")
+async def register_voiceprint(
+    jabobo_id: str = Form(...),
+    voiceprint_name: str = Form(...),
+    file_path: str = Form(...),
+    x_username: str = Header(...),  # 从请求头获取用户名（和知识库接口一致）
+    authorization: str = Header(...)
 ):
-    """
-    注册新的声纹特征
-    """
     print(f"\n===== 开始处理声纹注册请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"[请求信息] 说话人ID：{speaker_id} | 音频文件路径：{file_path}")
+    print(f"[请求信息] 用户名：{x_username} | 设备ID：{jabobo_id} | 声纹名称：{voiceprint_name} | 音频文件路径：{file_path}")
     
+    # 1. 身份验证（和知识库接口一致的权限校验）
+    verify_user(x_username, authorization)
+    
+    # 2. 音频文件校验（对齐知识库接口的文件校验逻辑）
+    print(f"\n[文件校验] 检查音频文件是否存在 - 路径：{file_path}")
+    if not os.path.exists(file_path):
+        print(f"[文件校验] 失败 - 音频文件不存在")
+        raise HTTPException(status_code=400, detail="音频文件不存在")
+    
+    # 2.1 校验文件后缀
+    print(f"\n[文件校验] 开始校验音频文件后缀 - 文件名：{os.path.basename(file_path)}")
+    file_ext = os.path.splitext(file_path)[1].lower()
+    print(f"[文件校验] 音频文件后缀：{file_ext} | 允许的后缀：{ALLOWED_AUDIO_EXTENSIONS}")
+    if file_ext not in ALLOWED_AUDIO_EXTENSIONS:
+        print(f"[文件校验] 失败 - 不支持的音频格式：{file_ext}")
+        raise HTTPException(status_code=400, detail="仅支持 WAV 格式音频文件")
+    print(f"[文件校验] 音频后缀校验通过")
+    
+    # 2.2 校验文件大小
+    file_size = os.path.getsize(file_path)
+    file_size_mb = round(file_size / 1024 / 1024, 2)
+    print(f"[文件校验] 音频文件大小：{file_size} 字节 ({file_size_mb} MB) | 最大允许：{MAX_AUDIO_SIZE / 1024 / 1024} MB")
+    if file_size > MAX_AUDIO_SIZE:
+        print(f"[文件校验] 失败 - 音频文件大小超过限制")
+        raise HTTPException(status_code=400, detail="音频文件大小超过 50MB 限制")
+    print(f"[文件校验] 大小校验通过")
+    
+    # 3. 生成SpeakerID（保持原有逻辑，增加日志）
+    speaker_id = hashlib.md5(f"{jabobo_id}_{voiceprint_name}".encode()).hexdigest()
+    print(f"[SpeakerID生成] 生成成功 - jabobo_id: {jabobo_id} | 声纹名称: {voiceprint_name} | speaker_id: {speaker_id}")
+    
+    db_connected = False
     try:
+        # 4. 数据库操作（对齐知识库接口的数据库逻辑）
+        print(f"\n[数据库操作] 检查声纹数量限制并保存记录")
+        db_connected = db.connect()
+        if not db_connected:
+            print(f"[数据库操作] 失败 - 数据库连接失败")
+            raise HTTPException(status_code=500, detail="数据库连接失败")
         
+        # 获取有效游标（和知识库接口一致）
+        cursor = get_valid_cursor()
         
-        # 1. 验证文件路径是否存在
-        print(f"\n[文件校验] 检查音频文件是否存在 - 路径：{file_path}")
-        if not os.path.exists(file_path):
-            print(f"[文件校验] 失败 - 文件不存在")
-            raise HTTPException(status_code=400, detail="音频文件不存在")
+        # 4.1 查询现有声纹记录
+        query_sql = "SELECT voiceprint_list FROM user_personas WHERE username = %s AND jabobo_id = %s"
+        print(f"[数据库操作] 执行查询SQL：{query_sql} | 参数：({x_username}, {jabobo_id})")
+        cursor.execute(query_sql, (x_username, jabobo_id))
+        result = cursor.fetchone()
+        print(f"[数据库操作] 查询结果：{result}")
         
-        # 2. 校验音频文件后缀
-        print(f"\n[文件校验] 开始校验音频文件后缀 - 文件名：{os.path.basename(file_path)}")
-        file_ext = os.path.splitext(file_path)[1].lower()
-        allowed_extensions = {".wav"}  # 声纹注册只接受WAV格式
-        print(f"[文件校验] 音频文件后缀：{file_ext} | 允许的后缀：{allowed_extensions}")
-        if file_ext not in allowed_extensions:
-            print(f"[文件校验] 失败 - 不支持的音频格式：{file_ext}")
-            raise HTTPException(status_code=400, detail="仅支持 WAV 音频格式")
-        print(f"[文件校验] 音频后缀校验通过")
-
-        # 3. 校验音频文件大小
-        file_size = os.path.getsize(file_path)
-        file_size_mb = round(file_size / 1024 / 1024, 2)
-        max_file_size = 50 * 1024 * 1024  # 50MB
-        print(f"[文件校验] 音频文件大小：{file_size} 字节 ({file_size_mb} MB) | 最大允许：{max_file_size / 1024 / 1024} MB")
-        if file_size > max_file_size:
-            print(f"[文件校验] 失败 - 音频文件大小超过限制")
-            raise HTTPException(status_code=400, detail="音频文件大小超过 50MB 限制")
-        print(f"[文件校验] 大小校验通过")
-
-        # 4. 读取音频文件内容
-        print(f"[文件读取] 开始读取音频文件内容")
-        with open(file_path, 'rb') as audio_file:
-            file_content = audio_file.read()
-        print(f"[文件读取] 音频文件内容读取完成 - 大小：{len(file_content)} 字节")
-
-        # 5. 调用声纹服务器进行注册
-        print(f"[声纹注册] 向声纹服务器发送注册请求 - 说话人ID：{speaker_id}")
-        voiceprint_server_url = "http://172.20.0.3:8005/voiceprint/register"
-        api_key = get_env("VOICEPRINT_API_KEY")  # API密钥
+        # 4.2 解析现有声纹列表（兼容空值/解析失败）
+        voiceprint_list = []
+        if result and result.get("voiceprint_list") is not None:
+            try:
+                voiceprint_list = json.loads(result["voiceprint_list"])
+                print(f"[数据库操作] 解析现有声纹列表成功 - 列表长度：{len(voiceprint_list)}")
+            except json.JSONDecodeError:
+                print(f"[数据库操作] 解析现有声纹列表失败 - 重置为空列表")
+                voiceprint_list = []
+        else:
+            print(f"[数据库操作] 无现有声纹记录 - 初始化空列表")
+            voiceprint_list = []
         
-        # 记录API请求开始时间
-        api_start_time = time.monotonic()
+        # 4.3 检查声纹数量限制（最多10个）
+        if len(voiceprint_list) >= 10:
+            print(f"[数据库操作] 失败 - 声纹数量已达上限（10个）")
+            raise HTTPException(status_code=400, detail="该设备声纹数量已达上限（最多10个）")
         
-        # 准备请求头
-        headers = {
-            'Authorization': f'Bearer {api_key}',
-            'Accept': 'application/json'
+        # 4.4 检查同名声纹（避免重复）
+        duplicate = any(item.get("voiceprint_name") == voiceprint_name for item in voiceprint_list)
+        if duplicate:
+            print(f"[数据库操作] 失败 - 已存在名为{voiceprint_name}的声纹")
+            raise HTTPException(status_code=400, detail=f"该设备已存在名为{voiceprint_name}的声纹")
+        
+        # 4.5 构建新声纹记录（对齐知识库接口的文件信息格式）
+        voiceprint_info = {
+            "voiceprint_name": voiceprint_name,
+            "speaker_id": speaker_id,
+            "file_path": file_path,
+            "file_size_bytes": file_size,
+            "file_size_mb": file_size_mb,
+            "create_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "create_timestamp": datetime.now().timestamp()
         }
+        print(f"[数据库操作] 构建声纹信息：{voiceprint_info}")
         
-        # 准备multipart/form-data数据
-        data = aiohttp.FormData()
-        data.add_field('speaker_id', speaker_id)
-        data.add_field('file', file_content, filename=os.path.basename(file_path), content_type='audio/wav')
+        # 4.6 追加新记录并更新数据库
+        voiceprint_list.append(voiceprint_info)
+        voiceprint_json = json.dumps(voiceprint_list, ensure_ascii=False)
         
-        timeout = aiohttp.ClientTimeout(total=30)  # 注册可能需要更长时间
+        upsert_sql = """
+            INSERT INTO user_personas (username, jabobo_id, voiceprint_list) 
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE voiceprint_list = VALUES(voiceprint_list)
+        """
+        print(f"[数据库操作] 执行更新SQL：{upsert_sql} | 参数：({x_username}, {jabobo_id}, {voiceprint_json[:100]}...)")
+        cursor.execute(upsert_sql, (x_username, jabobo_id, voiceprint_json))
         
-        # 网络请求
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(voiceprint_server_url, headers=headers, data=data) as response:
-                
-                if response.status == 200:
-                    response_data = await response.json()
-                    total_elapsed_time = time.monotonic() - api_start_time
-                    
-                    print(f"[声纹注册] 声纹识别耗时: {total_elapsed_time:.3f}s")
-                    
-                    success = response_data.get("success", True)
-                    msg = response_data.get("msg", "声纹注册成功")
-                    
-                    print(f"[声纹注册] 声纹服务器响应状态码：{response.status}")
-                    print(f"[声纹注册] 声纹服务器响应内容：{response_data}")
-                    
-                    print(f"\n[注册完成] 成功 - 说话人ID：{speaker_id} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                    print(f"===== 声纹注册请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                    
-                    return {
-                        "success": success,
-                        "msg": msg
-                    }
-                else:
-                    print(f"[声纹注册] 失败 - 声纹服务器返回非200状态码: {response.status}")
-                    error_msg = await response.text()
-                    print(f"[声纹注册] 错误详情: {error_msg}")
-                    raise HTTPException(status_code=response.status, detail=f"声纹服务器返回错误: {error_msg}")
+        # 核心：提交事务（和知识库接口一致）
+        db.connection.commit()
+        print(f"[数据库操作] 事务提交成功")
         
-    except HTTPException as e:
-        # 重新抛出已定义的HTTP异常
-        print(f"[声纹注册异常] HTTP异常 - {e.detail}")
-        raise
-    except ImportError:
-        # 如果aiohttp模块未安装
-        print(f"[声纹注册异常] 缺少aiohttp模块，请安装: pip install aiohttp")
-        raise HTTPException(status_code=500, detail="系统缺少aiohttp模块，请联系管理员")
-    except asyncio.TimeoutError:
-        elapsed = time.monotonic() - api_start_time
-        print(f"[声纹注册超时] 耗时: {elapsed:.3f}s")
-        raise HTTPException(status_code=408, detail=f"声纹注册超时: {elapsed:.3f}s")
-    except Exception as e:
-        elapsed = time.monotonic() - api_start_time if 'api_start_time' in locals() else 0
-        print(f"\n[声纹注册异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        raise HTTPException(status_code=500, detail=f"声纹注册失败: {str(e)}")
+        print(f"\n[声纹注册] 成功 - speaker_id：{speaker_id} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"===== 声纹注册请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        return {
+            "success": True,
+            "speaker_id": speaker_id,
+            "voiceprint_info": voiceprint_info,
+            "total_voiceprints": len(voiceprint_list),
+            "message": "声纹注册成功"
+        }
     
+    except Exception as e:
+        print(f"\n[声纹注册异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        if db_connected and db.connection:
+            try:
+                print(f"[数据库回滚] 开始回滚事务")
+                db.connection.rollback()
+                print(f"[数据库回滚] 回滚完成")
+            except Exception as rollback_e:
+                print(f"[数据库回滚] 失败 - 异常：{str(rollback_e)}")
+        raise HTTPException(status_code=500, detail=f"声纹注册失败: {str(e)}")
+    finally:
+        # 资源释放（和知识库接口完全一致）
+        print(f"\n[资源释放] 关闭数据库连接 - 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        if db_connected and db.connection:
+            try:
+                if hasattr(db, 'cursor') and db.cursor:
+                    db.cursor.close()
+                db.close()
+            except Exception as close_e:
+                print(f"[资源释放] 关闭连接失败：{str(close_e)}")
+        print(f"[资源释放] 数据库连接已关闭\n")
+
+# --- 可选：声纹列表查询接口（对齐知识库list接口）---
+@router.get("/voiceprint/list")
+async def list_voiceprints(
+    jabobo_id: str = Query(..., description="设备ID"),
+    x_username: str = Header(...),
+    authorization: str = Header(...)
+):
+    print(f"\n===== 开始处理声纹列表查询请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[请求信息] 用户名：{x_username} | 设备ID：{jabobo_id}")
+    
+    # 身份验证
+    verify_user(x_username, authorization)
+    
+    db_connected = False
+    try:
+        # 数据库连接
+        db_connected = db.connect()
+        if not db_connected:
+            raise HTTPException(status_code=500, detail="数据库连接失败")
+        
+        cursor = get_valid_cursor()
+        # 查询声纹列表
+        query_sql = "SELECT voiceprint_list FROM user_personas WHERE username = %s AND jabobo_id = %s"
+        print(f"[数据库操作] 执行查询SQL：{query_sql} | 参数：({x_username}, {jabobo_id})")
+        cursor.execute(query_sql, (x_username, jabobo_id))
+        result = cursor.fetchone()
+        
+        # 解析结果
+        voiceprint_detail_list = []
+        if result and result.get("voiceprint_list") is not None:
+            try:
+                voiceprint_list = json.loads(result["voiceprint_list"])
+                print(f"[数据解析] 解析JSON成功 - 列表长度：{len(voiceprint_list)}")
+                
+                for idx, item in enumerate(voiceprint_list):
+                    print(f"[数据处理] 处理第 {idx+1} 条声纹记录：{item}")
+                    if isinstance(item, dict):
+                        file_path = item.get("file_path")
+                        # 检查音频文件是否存在
+                        if os.path.exists(file_path):
+                            item["file_status"] = "valid"
+                        else:
+                            item["file_status"] = "invalid (file not exists)"
+                        voiceprint_detail_list.append(item)
+            except json.JSONDecodeError as e:
+                print(f"[数据解析] 失败 - JSON解析异常：{str(e)}")
+                voiceprint_detail_list = []
+        
+        print(f"\n[查询完成] 成功 - 共查询到 {len(voiceprint_detail_list)} 条声纹记录 | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"===== 声纹列表查询请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        return {
+            "success": True,
+            "total_count": len(voiceprint_detail_list),
+            "voiceprint_list": voiceprint_detail_list,
+            "message": "声纹列表查询成功"
+        }
+    except Exception as e:
+        print(f"\n[查询异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        if db_connected and db.connection:
+            db.connection.rollback()
+        raise HTTPException(status_code=500, detail=f"查询声纹列表失败：{str(e)}")
+    finally:
+        # 资源释放
+        if db_connected and db.connection:
+            try:
+                if hasattr(db, 'cursor') and db.cursor:
+                    db.cursor.close()
+                db.close()
+            except Exception as close_e:
+                print(f"[资源释放] 关闭连接失败：{str(close_e)}")
+        print(f"[资源释放] 数据库连接已关闭\n")
+                
 @router.delete("/voiceprint/delete")
 async def delete_voiceprint(
-speaker_id: str=Form(..., description="说话人ID")
+    jabobo_id: str = Form(..., description="设备ID"),
+    voiceprint_name: str = Form(..., description="声纹名称"),
+    # 可选：也可以通过speaker_id删除
+    speaker_id: Optional[str] = Form(None, description="说话人ID（可选，优先级高于声纹名称）")
 ):
-        
     """
     删除声纹
+    - 支持通过设备ID+声纹名称 或 speaker_id 删除
+    - 删除时同时更新数据库中的声纹列表
     """
     print(f"\n===== 开始处理声纹删除请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"[请求信息] 说话人ID：{speaker_id}")
+    print(f"[请求信息] 设备ID：{jabobo_id} | 声纹名称：{voiceprint_name} | speaker_id：{speaker_id}")
     
     try:
+        # 1. 数据库连接
+        if not db.connect():
+            print(f"[数据库操作] 失败 - 数据库连接失败")
+            raise HTTPException(status_code=500, detail="数据库连接失败")
         
-        # 声纹删除接口
-        voiceprint_server_url = f"http://172.20.0.3:8005/voiceprint/{speaker_id}"  # 修正：使用f-string格式化URL
+        # 2. 生成speaker_id（如果未传入）
+        if not speaker_id:
+            speaker_id = generate_speaker_id(jabobo_id, voiceprint_name)
+        print(f"[SpeakerID生成] 使用speaker_id：{speaker_id}")
         
-        api_key = get_env("VOICEPRINT_API_KEY")  # API密钥
+        # 3. 查询并解析声纹列表
+        cursor = get_valid_cursor()
+        query_sql = "SELECT voiceprint_list FROM user_personas WHERE jabobo_id = %s LIMIT 1"
+        cursor.execute(query_sql, (jabobo_id,))
+        result = cursor.fetchone()
         
-        # 记录API请求开始时间
+        if not result or not result.get("voiceprint_list"):
+            raise HTTPException(status_code=404, detail=f"该设备ID({jabobo_id})暂无声纹记录")
+        
+        voiceprint_list = json.loads(result["voiceprint_list"])
+        if not voiceprint_list:
+            raise HTTPException(status_code=404, detail=f"该设备ID({jabobo_id})暂无声纹记录")
+        
+        # 4. 查找要删除的声纹记录
+        delete_index = -1
+        delete_item = None
+        for idx, item in enumerate(voiceprint_list):
+            if item.get("speaker_id") == speaker_id or item.get("voiceprint_name") == voiceprint_name:
+                delete_index = idx
+                delete_item = item
+                break
+        
+        if delete_index == -1:
+            raise HTTPException(status_code=404, detail=f"未找到声纹记录（名称：{voiceprint_name} | speaker_id：{speaker_id}）")
+        
+        # 5. 调用声纹服务器进行删除
+        voiceprint_server_url = f"http://172.20.0.3:8005/voiceprint/{speaker_id}"
+        api_key = get_env("VOICEPRINT_API_KEY")
+        
         api_start_time = time.monotonic()
+        timeout = aiohttp.ClientTimeout(total=30)
         
-        timeout = aiohttp.ClientTimeout(total=30)  # 注册可能需要更长时间
-        
-        
-        # 准备请求头
         headers = {
             'Authorization': f'Bearer {api_key}',
             'Accept': 'application/json',
-            'speaker_id': 'speaker_id'
+            'speaker_id': speaker_id
         }
-        # 网络请求
+        
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.delete(voiceprint_server_url, headers=headers) as response:
                 
@@ -793,7 +1014,26 @@ speaker_id: str=Form(..., description="说话人ID")
                     response_data = await response.json()
                     total_elapsed_time = time.monotonic() - api_start_time
                     
-                    print(f"[声纹删除] 声纹识别耗时: {total_elapsed_time:.3f}s")
+                    print(f"[声纹删除] 耗时: {total_elapsed_time:.3f}s")
+                    
+                    # 6. 从列表中移除声纹记录
+                    voiceprint_list.pop(delete_index)
+                    voiceprint_json = json.dumps(voiceprint_list, ensure_ascii=False)
+                    
+                    # 7. 更新数据库
+                    upsert_sql = """
+                        UPDATE user_personas 
+                        SET voiceprint_list = %s 
+                        WHERE jabobo_id = %s
+                    """
+                    cursor.execute(upsert_sql, (voiceprint_json, jabobo_id))
+                    db.connection.commit()
+                    
+                    # 8. 删除本地音频文件（可选）
+                    file_path = delete_item.get("file_path")
+                    if file_path and os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"[文件删除] 本地音频文件已删除：{file_path}")
                     
                     success = response_data.get("success", True)
                     msg = response_data.get("msg", "声纹删除成功")
@@ -801,12 +1041,17 @@ speaker_id: str=Form(..., description="说话人ID")
                     print(f"[声纹删除] 声纹服务器响应状态码：{response.status}")
                     print(f"[声纹删除] 声纹服务器响应内容：{response_data}")
                     
-                    print(f"\n[注册完成] 成功 - 说话人ID：{speaker_id} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    print(f"\n[删除完成] 成功 - 设备ID：{jabobo_id} | 声纹名称：{voiceprint_name} | speaker_id：{speaker_id} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
                     print(f"===== 声纹删除请求处理完成 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                     
                     return {
                         "success": success,
-                        "msg": msg
+                        "msg": msg,
+                        "jabobo_id": jabobo_id,
+                        "voiceprint_name": voiceprint_name,
+                        "speaker_id": speaker_id,
+                        "deleted_voiceprint": delete_item,
+                        "remaining_count": len(voiceprint_list)
                     }
                 else:
                     print(f"[声纹删除] 失败 - 声纹服务器返回非200状态码: {response.status}")
@@ -815,11 +1060,9 @@ speaker_id: str=Form(..., description="说话人ID")
                     raise HTTPException(status_code=response.status, detail=f"声纹服务器返回错误: {error_msg}")
                 
     except HTTPException as e:
-        # 重新抛出已定义的HTTP异常
         print(f"[声纹删除异常] HTTP异常 - {e.detail}")
         raise
     except ImportError:
-        # 如果aiohttp模块未安装
         print(f"[声纹删除异常] 缺少aiohttp模块，请安装: pip install aiohttp")
         raise HTTPException(status_code=500, detail="系统缺少aiohttp模块，请联系管理员")
     except asyncio.TimeoutError:
@@ -829,4 +1072,10 @@ speaker_id: str=Form(..., description="说话人ID")
     except Exception as e:
         elapsed = time.monotonic() - api_start_time if 'api_start_time' in locals() else 0
         print(f"\n[声纹删除异常] 失败 - 异常信息：{str(e)} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        if db.connection:
+            db.connection.rollback()
         raise HTTPException(status_code=500, detail=f"声纹删除失败: {str(e)}")
+    finally:
+        if db.connection:
+            db.close()
+            print(f"[资源释放] 数据库连接已关闭")
