@@ -11,7 +11,9 @@ import asyncio
 import aiohttp
 import time
 from dotenv import load_dotenv
-import hashlib  # 新增：用于生成hash
+
+# 移除了hashlib导入（因为不再使用MD5哈希）
+# import hashlib  # 新增：用于生成hash
 
 load_dotenv()
 
@@ -45,16 +47,14 @@ def get_username_by_jabobo_id(jabobo_id: str):
     print(f"[用户查询] 成功 - 设备ID {jabobo_id} 对应用户名：{username} | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     return username
 
-# 新增辅助函数：生成speaker_id
+# 新增辅助函数：生成speaker_id（核心修改：去掉hash，直接拼接）
 def generate_speaker_id(jabobo_id: str, voiceprint_name: str) -> str:
     """
     通过jabobo_id + 声纹名称生成唯一的speaker_id
-    使用MD5 hash，确保唯一性和固定长度
+    直接拼接字符串，不再使用MD5 hash
     """
-    # 拼接字符串并编码
-    combined_str = f"{jabobo_id}_{voiceprint_name}"
-    # 生成MD5 hash
-    speaker_id = hashlib.md5(combined_str.encode('utf-8')).hexdigest()
+    # 直接拼接字符串，替代原有的MD5哈希逻辑
+    speaker_id = f"{jabobo_id}_{voiceprint_name}"
     return speaker_id
 
 # 新增辅助函数：查询并校验声纹数量
@@ -764,12 +764,48 @@ async def register_voiceprint(
         raise HTTPException(status_code=400, detail="音频文件大小超过 50MB 限制")
     print(f"[文件校验] 大小校验通过")
     
-    # 3. 生成SpeakerID（保持原有逻辑，增加日志）
-    speaker_id = hashlib.md5(f"{jabobo_id}_{voiceprint_name}".encode()).hexdigest()
+    # 3. 生成SpeakerID（核心修改：去掉MD5，直接拼接）
+    speaker_id = f"{jabobo_id}_{voiceprint_name}"  # 直接拼接，不再使用hash
     print(f"[SpeakerID生成] 生成成功 - jabobo_id: {jabobo_id} | 声纹名称: {voiceprint_name} | speaker_id: {speaker_id}")
     
     db_connected = False
     try:
+        # ===================== 新增：调用声纹服务器注册 =====================
+        print(f"\n[声纹服务器] 开始向 172.20.0.3:8005 发送注册请求")
+        voiceprint_server_url = "http://localhost:8005/voiceprint/register"
+        print(f"[声纹服务器] 请求地址：{voiceprint_server_url}")
+        api_key = get_env("VOICEPRINT_API_KEY")
+        
+        # 读取音频文件内容
+        with open(file_path, 'rb') as audio_file:
+            file_content = audio_file.read()
+        print(f"[声纹服务器] 音频文件内容读取完成 - 大小：{len(file_content)} 字节")
+        
+        # 准备请求参数
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Accept': 'application/json'
+        }
+        data = aiohttp.FormData()
+        data.add_field('speaker_id', speaker_id)
+        data.add_field('file', file_content, filename=os.path.basename(file_path), content_type='audio/wav')
+        
+        # 发送请求到声纹服务器
+        api_start_time = time.monotonic()
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(voiceprint_server_url, headers=headers, data=data) as response:
+                if response.status != 200:
+                    error_msg = await response.text()
+                    print(f"[声纹服务器] 注册失败 - 状态码：{response.status} | 错误：{error_msg}")
+                    raise HTTPException(status_code=response.status, detail=f"声纹服务器注册失败：{error_msg}")
+                
+                # 解析声纹服务器响应
+                server_response = await response.json()
+                total_elapsed_time = time.monotonic() - api_start_time
+                print(f"[声纹服务器] 注册成功 - 耗时：{total_elapsed_time:.3f}s | 响应：{server_response}")
+        
+        # ===================== 原有：数据库存储逻辑 =====================
         # 4. 数据库操作（对齐知识库接口的数据库逻辑）
         print(f"\n[数据库操作] 检查声纹数量限制并保存记录")
         db_connected = db.connect()
@@ -846,7 +882,7 @@ async def register_voiceprint(
             "speaker_id": speaker_id,
             "voiceprint_info": voiceprint_info,
             "total_voiceprints": len(voiceprint_list),
-            "message": "声纹注册成功"
+            "message": "声纹注册成功（声纹服务器+本地数据库）"
         }
     
     except Exception as e:
@@ -964,9 +1000,9 @@ async def delete_voiceprint(
             print(f"[数据库操作] 失败 - 数据库连接失败")
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
-        # 2. 生成speaker_id（如果未传入）
+        # 2. 生成speaker_id（如果未传入，直接拼接）
         if not speaker_id:
-            speaker_id = generate_speaker_id(jabobo_id, voiceprint_name)
+            speaker_id = f"{jabobo_id}_{voiceprint_name}"  # 核心修改：直接拼接
         print(f"[SpeakerID生成] 使用speaker_id：{speaker_id}")
         
         # 3. 查询并解析声纹列表
@@ -995,7 +1031,7 @@ async def delete_voiceprint(
             raise HTTPException(status_code=404, detail=f"未找到声纹记录（名称：{voiceprint_name} | speaker_id：{speaker_id}）")
         
         # 5. 调用声纹服务器进行删除
-        voiceprint_server_url = f"http://172.20.0.3:8005/voiceprint/{speaker_id}"
+        voiceprint_server_url = f"http://localhost:8005/voiceprint/{speaker_id}"
         api_key = get_env("VOICEPRINT_API_KEY")
         
         api_start_time = time.monotonic()
@@ -1066,7 +1102,7 @@ async def delete_voiceprint(
         print(f"[声纹删除异常] 缺少aiohttp模块，请安装: pip install aiohttp")
         raise HTTPException(status_code=500, detail="系统缺少aiohttp模块，请联系管理员")
     except asyncio.TimeoutError:
-        elapsed = time.monotonic() - api_start_time
+        elapsed = time.monotonic() - api_start_time if 'api_start_time' in locals() else 0
         print(f"[声纹删除超时] 耗时: {elapsed:.3f}s")
         raise HTTPException(status_code=408, detail=f"声纹删除超时: {elapsed:.3f}s")
     except Exception as e:
