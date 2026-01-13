@@ -1,11 +1,12 @@
-from fastapi import APIRouter, HTTPException, Query, Header, File, Response
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, HTTPException, Query, Header, Response
+from fastapi.responses import FileResponse, StreamingResponse
 from app.database import db, unactivated_macs, activation_codes  # 复用你已有的数据库实例和全局数组
 import json
 from datetime import datetime, timezone
 import time
 import hashlib
 import os
+from fastapi.requests import Request  # 添加这一行
 
 router = APIRouter()
 #这个接口后面可以用来做OTA
@@ -50,8 +51,8 @@ async def get_device_full_data(
         # 7. 确保关闭数据库连接
         db.close()
         
-# 添加固件下载路由
 @router.get("/xiaozhi/otaMag/download/{filename}")
+@router.head("/xiaozhi/otaMag/download/{filename}")  # ✅ 添加 HEAD 支持
 async def download_firmware(filename: str):
     """
     固件下载接口 - 用于OTA升级
@@ -72,17 +73,16 @@ async def download_firmware(filename: str):
     
     file_size = os.path.getsize(firmware_path)
     print(f"✅ [FIRMWARE_DOWNLOAD] Found firmware file: {firmware_path}, size: {file_size} bytes")
-    
-    # 返回文件响应，设置适当的HTTP头以支持流式下载
-    print(f"📤 [FIRMWARE_DOWNLOAD] Starting firmware download for: {filename}")
-    return Response(
-        content=open(firmware_path, "rb").read(),
+
+    # ✅ 使用 FileResponse，直接传路径
+    return FileResponse(
+        path=firmware_path,
+        filename=filename,
         media_type='application/octet-stream',
         headers={
-            "Content-Disposition": f"attachment; filename={filename}",
             "Cache-Control": "no-cache",
+            "Accept-Ranges": "bytes",
             "Content-Length": str(file_size),
-            "Accept-Ranges": "bytes"
         }
     )
         
@@ -153,7 +153,8 @@ async def handle_ota_request(
             "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
         },
         "firmware": {
-            "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
+            # "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
+            "version": "2.0.2",
             "url": "http://121.41.168.85:8007/api/xiaozhi/otaMag/download/Jabob.bin",  # Updated to point to actual firmware file
             "force": 1
         },
