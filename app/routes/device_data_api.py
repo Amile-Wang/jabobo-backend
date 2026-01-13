@@ -54,23 +54,36 @@ async def get_device_full_data(
 @router.get("/xiaozhi/otaMag/download/{filename}")
 async def download_firmware(filename: str):
     """
-    固件下载接口
+    固件下载接口 - 用于OTA升级
     """
+    print(f"📥 [FIRMWARE_DOWNLOAD] Firmware download requested: {filename}")
+    
     # 确保文件名安全，防止路径遍历攻击
     if filename != "Jabob.bin":
+        print(f"❌ [FIRMWARE_DOWNLOAD] Invalid firmware filename: {filename}")
         raise HTTPException(status_code=404, detail="Firmware file not found")
     
     firmware_path = "/var/local/jobobo-backend/OTA/Jabob.bin"
     
     # 检查文件是否存在
     if not os.path.exists(firmware_path):
+        print(f"❌ [FIRMWARE_DOWNLOAD] Firmware file not found at path: {firmware_path}")
         raise HTTPException(status_code=404, detail="Firmware file not found")
     
-    # 返回文件响应
-    return FileResponse(
-        path=firmware_path,
-        filename=filename,
-        media_type='application/octet-stream'
+    file_size = os.path.getsize(firmware_path)
+    print(f"✅ [FIRMWARE_DOWNLOAD] Found firmware file: {firmware_path}, size: {file_size} bytes")
+    
+    # 返回文件响应，设置适当的HTTP头以支持流式下载
+    print(f"📤 [FIRMWARE_DOWNLOAD] Starting firmware download for: {filename}")
+    return Response(
+        content=open(firmware_path, "rb").read(),
+        media_type='application/octet-stream',
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Cache-Control": "no-cache",
+            "Content-Length": str(file_size),
+            "Accept-Ranges": "bytes"
+        }
     )
         
         # OTA接口：接收设备发送的OTA请求
