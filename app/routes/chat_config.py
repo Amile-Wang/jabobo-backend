@@ -79,7 +79,7 @@ async def get_server_base_config():
                     "type": "silero",
                     "model_dir": "models/snakers4_silero-vad",
                     "threshold": "0.85",
-                    "min_silence_duration_ms": "200"
+                    "min_silence_duration_ms": "500"
                 }
             },
             "summaryMemory": None,

@@ -463,9 +463,11 @@ def get_username_by_jabobo_id(jabobo_id: str):
         if cursor:
             cursor.close()
 
+
+# localhost/8007/api/user/generate-rag-prompt
 @router.post("/user/generate-rag-prompt")
 async def generate_rag_prompt(
-    jabobo_id: str = Query(..., description="设备ID（洁宝宝ID）"),
+    jabobo_id: str = Query(..., description="设备ID（捷宝宝ID）"),
     question: str = Query(..., description="用户问题")
 ):
     """根据设备ID和用户问题，调用build_rag_prompt_from_vector_file生成RAG提示词（无需身份验证）"""
