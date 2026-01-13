@@ -116,7 +116,8 @@ async def handle_ota_request(
         },
         "firmware": {
             "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
-            "url": "http://xiaozhi.server.com:8002/xiaozhi/otaMag/download/NOT_ACTIVATED_FIRMWARE_THIS_IS_A_INVALID_URL"
+            "url": "http://xiaozhi.server.com:8002/xiaozhi/otaMag/download/NOT_ACTIVATED_FIRMWARE_THIS_IS_A_INVALID_URL",
+            "force": 0
         },
         "websocket": {
             "url": "ws://121.41.168.85:8000/xiaozhi/v1/"
