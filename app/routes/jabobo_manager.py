@@ -127,6 +127,8 @@ async def get_user_config(
         
         raw_persona = config.get('personas', "[]") if config else "[]"
         memory_data = config.get('memory', "") if config else ""
+        current_version = config.get('current_version', "") if config else ""  
+        expected_version = config.get('expected_version', "") if config else ""  
 
         print(f"🔍 [GET] User: {x_username} | Device: {jabobo_id} | Persona length: {len(raw_persona)}")
         return {
@@ -135,7 +137,9 @@ async def get_user_config(
                 "persona": raw_persona,
                 "memory": memory_data,
                 "voice_status": "已就绪",
-                "kb_status": "已同步"
+                "kb_status": "已同步",
+                "current_version": current_version,
+                "expected_version": expected_version
             }
         }
     finally:

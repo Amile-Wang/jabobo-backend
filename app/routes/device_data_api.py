@@ -50,6 +50,81 @@ async def get_device_full_data(
         # 7. 确保关闭数据库连接
         db.close()
         
+
+@router.put("/user/device/update_version", description="更新设备的版本号（current_version/expected_version）")
+async def update_device_version(
+    jabobo_id: str = Query(..., description="要更新的设备ID"),
+    current_version: str = Query(None, description="要设置的当前版本号（如1.0）"),
+    expected_version: str = Query(None, description="要设置的预期版本号（如1.1）")
+):
+    # 1. 设备ID非空校验（和原有接口保持一致）
+    if not jabobo_id.strip():
+        raise HTTPException(status_code=400, detail="设备ID不能为空")
+    
+    # 2. 版本号参数校验：至少传入一个版本号字段用于更新
+    if current_version is None and expected_version is None:
+        raise HTTPException(status_code=400, detail="至少需要传入current_version或expected_version其中一个字段")
+    
+    # 3. 数据库连接校验（和原有接口保持一致）
+    if not db.connect():
+        raise HTTPException(status_code=500, detail="数据库连接失败")
+    
+    try:
+        # 4. 构造动态更新SQL（只更新传入的非空版本号字段）
+        update_fields = []
+        update_params = []
+        
+        if current_version is not None:
+            update_fields.append("current_version = %s")
+            update_params.append(current_version.strip())
+        
+        if expected_version is not None:
+            update_fields.append("expected_version = %s")
+            update_params.append(expected_version.strip())
+        
+        # 拼接SQL语句
+        sql = f"UPDATE user_personas SET {', '.join(update_fields)} WHERE jabobo_id = %s"
+        # 补充设备ID参数
+        update_params.append(jabobo_id)
+        
+        # 5. 执行更新操作
+        db.cursor.execute(sql, tuple(update_params))
+        # 提交事务（关键：更新操作必须提交才能生效）
+        db.conn.commit()
+        
+        # 6. 处理更新结果
+        affected_rows = db.cursor.rowcount
+        if affected_rows == 0:
+            return {
+                "success": False,
+                "message": f"未找到ID为 {jabobo_id} 的设备数据，更新失败",
+                "data": None
+            }
+        
+        # 7. 日志打印（保持和原有接口一致的风格）
+        print(f"🔄 [UPDATE_VERSION] Device: {jabobo_id} | CurrentVersion: {current_version or '1.0.0'} | ExpectedVersion: {expected_version or '1.0.0'} | AffectedRows: {affected_rows}")
+        
+        # 8. 返回成功结果
+        return {
+            "success": True,
+            "message": "设备版本号更新成功",
+            "data": {
+                "jabobo_id": jabobo_id,
+                "current_version": current_version,
+                "expected_version": expected_version
+            }
+        }
+    
+    except Exception as e:
+        # 异常回滚（防止更新操作部分生效）
+        db.conn.rollback()
+        print(f"❌ [UPDATE_VERSION_ERROR] Device: {jabobo_id} | Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"版本号更新失败：{str(e)}")
+    
+    finally:
+        # 9. 确保关闭数据库连接（和原有接口保持一致）
+        db.close()
+        
 # 添加固件下载路由
 @router.get("/xiaozhi/otaMag/download/{filename}")
 async def download_firmware(filename: str):
