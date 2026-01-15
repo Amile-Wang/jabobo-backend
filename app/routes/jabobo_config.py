@@ -21,38 +21,49 @@ async def get_user_config(
         if not db_connected:
             raise HTTPException(status_code=500, detail="数据库连接失败")
         
-        # ========== 核心修改：调用verify_user进行多端token校验 ==========
-        # 替换原来的session_token查询校验逻辑
+        # 2. 用户token校验
         verify_user(x_username, authorization)
         
-        # 2. 获取有效游标
+        # 3. 获取有效游标
         cursor = get_valid_cursor()
 
-        # 3. 查询配置（业务逻辑保持不变）
-        sql = "SELECT personas, memory FROM user_personas WHERE username = %s AND jabobo_id = %s"
+        # ========== 核心修改1：SQL查询添加版本号字段 ==========
+        # 原问题：未查询 current_version/expected_version，导致后续读取不到
+        sql = """
+            SELECT personas, memory, current_version, expected_version 
+            FROM user_personas 
+            WHERE username = %s AND jabobo_id = %s
+        """
         cursor.execute(sql, (x_username, jabobo_id))
-        config = cursor.fetchone()
+        config = cursor.fetchone()  # 返回字典格式（依赖get_valid_cursor配置）
 
-        # 四层防御：确保变量绝对不是None
+        # ========== 核心修改2：分层读取+兜底，确保版本号读取正确 ==========
+        # 第一层：配置不存在 → 版本号设为默认值（如1.0.0）
         if config is None:
             raw_persona = "[]"
             memory_data = ""
+            current_version = "1.0.0"  # 版本号默认值
+            expected_version = "1.0.0"
         else:
-            raw_persona = config.get('personas') if config.get('personas') is not None else "[]"
-            memory_data = config.get('memory') if config.get('memory') is not None else ""
+            # 第二层：配置存在，读取各字段（空值兜底）
+            raw_persona = config.get('personas') or "[]"
+            memory_data = config.get('memory') or ""
+            # 版本号读取：数据库值 → 空值 → 默认值
+            current_version = config.get('current_version') or "1.0.0"
+            expected_version = config.get('expected_version') or "1.0.0"
         
-        # 强制转为字符串
-        raw_persona = str(raw_persona) if isinstance(raw_persona, (str, None)) else "[]"
-        memory_data = str(memory_data) if isinstance(memory_data, (str, None)) else ""
+        # ========== 数据类型统一+安全处理 ==========
+        # 强制转为字符串，避免非字符串类型（如None/int）
+        raw_persona = str(raw_persona).strip() if raw_persona else "[]"
+        memory_str = str(memory_data).strip() if memory_data else ""
+        # 版本号强制转字符串+去空格（防止数据库存为数字/空格）
+        current_version = str(current_version).strip() or "1.0.0"
+        expected_version = str(expected_version).strip() or "1.0.0"
 
-        # 安全处理字符串
-        persona_str = raw_persona.strip()
-        memory_str = memory_data.strip()
+        # 最终数据兜底
+        final_persona = raw_persona if raw_persona else "[]"
 
-        # 核心：返回字符串格式（适配前端JSON.parse）
-        final_persona = persona_str if persona_str else "[]"
-
-        # 日志
+        # 日志增强：添加版本号日志
         persona_len = len(final_persona)
         memory_len = len(memory_str)
         print("-" * 50)
@@ -60,16 +71,20 @@ async def get_user_config(
         print(f"   👤 User: {x_username}")
         print(f"   🆔 Target Device: {jabobo_id}")
         print(f"   📦 Data Found: {persona_len} chars of persona, {memory_len} chars of memory")
+        print(f"   📌 Version: Current={current_version} | Expected={expected_version}")  # 新增版本号日志
         print(f"   📄 Persona Type: {type(final_persona)} | Preview: {final_persona[:50]}...")
         print("-" * 50)
 
+        # ========== 核心修改3：返回正确的版本号 ==========
         return {
             "success": True, 
             "data": {
                 "persona": final_persona,  
                 "memory": memory_str,
                 "voice_status": "已就绪",
-                "kb_status": "已同步"
+                "kb_status": "已同步",
+                "current_version": current_version,  # 确保有值且为字符串
+                "expected_version": expected_version  # 确保有值且为字符串
             }
         }
     except HTTPException:

@@ -89,8 +89,8 @@ async def update_device_version(
         
         # 5. 执行更新操作
         db.cursor.execute(sql, tuple(update_params))
-        # 提交事务（关键：更新操作必须提交才能生效）
-        db.conn.commit()
+        # 核心修复1：将 db.conn 改为 db.connection（MySQLConnector 类的正确连接属性名）
+        db.connection.commit()
         
         # 6. 处理更新结果
         affected_rows = db.cursor.rowcount
@@ -116,8 +116,14 @@ async def update_device_version(
         }
     
     except Exception as e:
-        # 异常回滚（防止更新操作部分生效）
-        db.conn.rollback()
+        # 核心修复2：将 db.conn 改为 db.connection
+        try:
+            # 增加容错：如果连接已关闭，跳过回滚
+            if db.connection and not db.connection.closed:
+                db.connection.rollback()
+        except:
+            pass
+        
         print(f"❌ [UPDATE_VERSION_ERROR] Device: {jabobo_id} | Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"版本号更新失败：{str(e)}")
     
