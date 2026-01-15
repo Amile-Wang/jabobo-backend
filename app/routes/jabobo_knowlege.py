@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Form, File, UploadFile, Header, HTTPException, Query
+from fastapi import APIRouter, Form, File, UploadFile, Header, HTTPException, Query, Request
 from app.database import db
 import json
 import os
 import shutil
-from typing import List
+from typing import List, Optional
 from datetime import datetime  # 处理时间戳
 from app.utils.rag import generate_vector_from_txt_folder, build_rag_prompt_from_vector_file
 # 全局Router（仅定义一次）
@@ -467,11 +467,25 @@ def get_username_by_jabobo_id(jabobo_id: str):
 # localhost/8007/api/user/generate-rag-prompt
 @router.post("/user/generate-rag-prompt")
 async def generate_rag_prompt(
-    jabobo_id: str = Query(..., description="设备ID（捷宝宝ID）"),
-    question: str = Query(..., description="用户问题")
+    request: Request,
+    jabobo_id: Optional[str] = Query(None, description="设备ID（捷宝宝ID）"),
+    question: Optional[str] = Query(None, description="用户问题")
 ):
     """根据设备ID和用户问题，调用build_rag_prompt_from_vector_file生成RAG提示词（无需身份验证）"""
     print(f"\n===== 开始处理RAG提示词生成请求 ===== | 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    # 如果 query 未提供，则尝试从 POST JSON 体中读取（兼容客户端使用 body 发送的情况）
+    if not jabobo_id or not question:
+        try:
+            body = await request.json()
+            if isinstance(body, dict):
+                jabobo_id = jabobo_id or body.get("jabobo_id")
+                question = question or body.get("question")
+        except Exception:
+            pass
+
+    if not jabobo_id or not question:
+        raise HTTPException(status_code=422, detail="Missing jabobo_id or question")
+
     print(f"[请求信息] 设备ID：{jabobo_id} | 用户问题：{question[:50]}...")
     
     db_connected = False

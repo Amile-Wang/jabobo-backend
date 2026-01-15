@@ -144,6 +144,9 @@ async def get_agent_models_config(payload: dict):
         # 从数据库获取设备特定配置，包括人设(prompt)和记忆(summaryMemory)
         device_prompt, device_memory = await get_device_config(mac_address)
         
+        # 根据设备MAC地址获取声纹列表
+        voiceprint_list = await get_voiceprint_list_by_mac(mac_address)
+        
         # 模拟代理模型配置
         agent_models_config = {
             "plugins": {
@@ -156,7 +159,8 @@ async def get_agent_models_config(payload: dict):
                 }
             },
             "selected_module": {
-                "TTS": "TTS_TencentTTS",
+                # "TTS": "TTS_TencentTTS",
+                "TTS": "HuoshanDoubleStreamTTS",
                 "Memory": "Memory_mem_local_short",
                 "Intent": "Intent_intent_llm",
                 "LLM": "LLM_AliLLM",
@@ -198,7 +202,8 @@ async def get_agent_models_config(payload: dict):
             "TTS": {
                 "TTS_TencentTTS": {
                     "type": "tencent",
-                    "appid": "1391329716",
+                    "appid": "1391329716",  # 精品音色 免费
+                    # "appid": "4604185782",  # 大模型音色
                     "voice": "101001",
                     "region": "ap-guangzhou",
                     "secret_id": get_env("TENCENT_TTS_SECRET_ID"),
@@ -206,14 +211,19 @@ async def get_agent_models_config(payload: dict):
                     "secret_key": get_env("TENCENT_TTS_SECRET_KEY"),
                     "private_voice": "101015",
                     "mcp_endpoint": get_env("TTS_MCP_ENDPOINT")
+                },
+                "HuoshanDoubleStreamTTS": {
+                    "type": "huoshan_double_stream",
+                    "appid": 1368522836,
+                    "access_token": get_env("HUOSHAN_TTS_ACCESS_TOKEN"),
+                    "resource_id": "volc.service_type.10029",
+                    "ws_url": "wss://openspeech.bytedance.com/api/v3/tts/bidirection",
+                    
+                   
                 }
             },
             "voiceprint": {
-                "speakers": [
-                    "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
-                    "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
-                    "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
-                ],
+                "speakers": voiceprint_list,
                 "url": get_env("VOICEPRINT_URL")
             },
             "summaryMemory": device_memory,  # 从数据库获取设备特定的记忆
@@ -241,6 +251,92 @@ async def get_agent_models_config(payload: dict):
             "msg": str(e),
             "data": None
         }
+        
+# 新增函数：根据设备MAC地址获取声纹列表
+async def get_voiceprint_list_by_mac(mac_address: str):
+    """
+    根据设备MAC地址获取声纹列表
+    :param mac_address: 设备MAC地址
+    :return: 声纹列表
+    """
+    if not mac_address:
+        # 如果没有提供设备MAC地址，返回默认声纹列表
+        default_voiceprints = [
+            "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
+            "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
+            "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
+        ]
+        return default_voiceprints
+    
+    connection = None
+    try:
+        # 检查数据库连接
+        connection = db.connect()
+        if not connection:
+            print("🔥 Database connection failed")
+            default_voiceprints = [
+                "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
+                "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
+                "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
+            ]
+            return default_voiceprints
+        
+        # 查询user_personas表中对应设备MAC地址的声纹列表
+        sql = "SELECT voiceprint_list FROM user_personas WHERE jabobo_id = %s"
+        cursor = db.cursor
+        cursor.execute(sql, (mac_address,))
+        result = cursor.fetchone()
+        
+        print(f"🔍 Voiceprint query result for {mac_address}: {result}")  # 添加调试信息
+        
+        if result and result.get("voiceprint_list") is not None:
+            try:
+                voiceprint_list = json.loads(result["voiceprint_list"])
+                print(f"🔍 Parsed voiceprint list: {voiceprint_list}")  # 添加调试信息
+                
+                # 将数据库中的声纹信息转换为所需的格式
+                formatted_voiceprints = []
+                for item in voiceprint_list:
+                    if isinstance(item, dict):
+                        speaker_id = item.get("speaker_id", "")
+                        voiceprint_name = item.get("voiceprint_name", "")
+                        description = "this is a speaker from user device"
+                        
+                        # 格式化为与默认声纹相同的格式
+                        formatted_entry = f"{speaker_id},{voiceprint_name},{description}"
+                        formatted_voiceprints.append(formatted_entry)
+                
+                return formatted_voiceprints
+            except json.JSONDecodeError as e:
+                print(f"🔥 JSON Decode Error when parsing voiceprint list: {str(e)}")
+                default_voiceprints = [
+                    "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
+                    "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
+                    "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
+                ]
+                return default_voiceprints
+        else:
+            # 如果设备MAC地址没有找到对应的声纹列表，返回默认值
+            print(f"⚠️ No voiceprint list found for MAC: {mac_address}")
+            default_voiceprints = [
+                "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
+                "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
+                "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
+            ]
+            return default_voiceprints
+    except Exception as e:
+        print(f"🔥 Database Error when fetching voiceprint list: {str(e)} - Type: {type(e).__name__}")
+        # 发生错误时返回默认值
+        default_voiceprints = [
+            "e3877b049aa7ca8863354f83418b9e1f,Tianhao,这是天豪,SIMULATION TEAM的实习生",
+            "2ef8f890252e057797565de6d6fc4f28,Alice,manager of simulation team",
+            "0f6b09bb29d23b90fb723fe7a01b0601,欣欣,5岁的小女孩，现在读中班了，爱运动，爱画画，足球踢得很好,是Alice的女儿，还有一个哥哥叫安安。"
+        ]
+        return default_voiceprints
+    finally:
+        # 关闭数据库连接
+        if connection:
+            db.close()
 
 # 新增函数：根据设备MAC地址获取设备配置（人设和记忆）
 async def get_device_config(jabobo_id: str) -> tuple:

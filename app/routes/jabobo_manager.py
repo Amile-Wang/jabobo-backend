@@ -71,9 +71,9 @@ async def bind_jabobo(
             return {"success": False, "message": "该设备已在您的列表中"}
 
         # 插入新设备，赋予初始 JSON 结构
-        default_persona = json.dumps([{"id": "p1", "name": "默认人设", "content": "你好，我是新绑定的捷宝宝。"}])
+        default_persona = json.dumps([{"id": "p1", "name": "默认人设", "content": "hello，i am your jabobo."}])
         sql = "INSERT INTO user_personas (username, jabobo_id, personas, memory) VALUES (%s, %s, %s, %s)"
-        db.cursor.execute(sql, (x_username, jabobo_id, default_persona, "尚无记忆"))
+        db.cursor.execute(sql, (x_username, jabobo_id, default_persona, "no memory now"))
         db.cursor.connection.commit()
         
         print(f"✨ [BIND] User: {x_username} | New Device: {jabobo_id}")

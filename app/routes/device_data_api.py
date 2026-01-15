@@ -1,11 +1,12 @@
-from fastapi import APIRouter, HTTPException, Query, Header, File, Response
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, HTTPException, Query, Header, Response
+from fastapi.responses import FileResponse, StreamingResponse
 from app.database import db, unactivated_macs, activation_codes  # 复用你已有的数据库实例和全局数组
 import json
 from datetime import datetime, timezone
 import time
 import hashlib
 import os
+from fastapi.requests import Request  # 添加这一行
 
 router = APIRouter()
 #这个接口后面可以用来做OTA
@@ -50,7 +51,6 @@ async def get_device_full_data(
         # 7. 确保关闭数据库连接
         db.close()
         
-
 @router.put("/user/device/update_version", description="更新设备的版本号（current_version/expected_version）")
 async def update_device_version(
     jabobo_id: str = Query(..., description="要更新的设备ID"),
@@ -126,26 +126,40 @@ async def update_device_version(
         db.close()
         
 # 添加固件下载路由
+
 @router.get("/xiaozhi/otaMag/download/{filename}")
+@router.head("/xiaozhi/otaMag/download/{filename}")  # ✅ 添加 HEAD 支持
 async def download_firmware(filename: str):
     """
-    固件下载接口
+    固件下载接口 - 用于OTA升级
     """
+    print(f"📥 [FIRMWARE_DOWNLOAD] Firmware download requested: {filename}")
+    
     # 确保文件名安全，防止路径遍历攻击
     if filename != "Jabob.bin":
+        print(f"❌ [FIRMWARE_DOWNLOAD] Invalid firmware filename: {filename}")
         raise HTTPException(status_code=404, detail="Firmware file not found")
     
     firmware_path = "/var/local/jobobo-backend/OTA/Jabob.bin"
     
     # 检查文件是否存在
     if not os.path.exists(firmware_path):
+        print(f"❌ [FIRMWARE_DOWNLOAD] Firmware file not found at path: {firmware_path}")
         raise HTTPException(status_code=404, detail="Firmware file not found")
     
-    # 返回文件响应
+    file_size = os.path.getsize(firmware_path)
+    print(f"✅ [FIRMWARE_DOWNLOAD] Found firmware file: {firmware_path}, size: {file_size} bytes")
+
+    # ✅ 使用 FileResponse，直接传路径
     return FileResponse(
         path=firmware_path,
         filename=filename,
-        media_type='application/octet-stream'
+        media_type='application/octet-stream',
+        headers={
+            "Cache-Control": "no-cache",
+            "Accept-Ranges": "bytes",
+            "Content-Length": str(file_size),
+        }
     )
         
         # OTA接口：接收设备发送的OTA请求
@@ -215,9 +229,10 @@ async def handle_ota_request(
             "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
         },
         "firmware": {
-            "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
+            # "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
+            "version": "2.0.3",
             "url": "http://121.41.168.85:8007/api/xiaozhi/otaMag/download/Jabob.bin",  # Updated to point to actual firmware file
-            "force": 1
+            "force": 0
         },
         "websocket": {
             "url": "ws://121.41.168.85:8000/xiaozhi/v1/"
