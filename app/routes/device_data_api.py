@@ -154,9 +154,9 @@ async def handle_ota_request(
         },
         "firmware": {
             # "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
-            "version": "2.0.2",
+            "version": "2.0.3",
             "url": "http://121.41.168.85:8007/api/xiaozhi/otaMag/download/Jabob.bin",  # Updated to point to actual firmware file
-            "force": 1
+            "force": 0
         },
         "websocket": {
             "url": "ws://121.41.168.85:8000/xiaozhi/v1/"
