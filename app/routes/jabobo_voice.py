@@ -978,8 +978,8 @@ async def list_voiceprints(
             except Exception as close_e:
                 print(f"[资源释放] 关闭连接失败：{str(close_e)}")
         print(f"[资源释放] 数据库连接已关闭\n")
-                
-@router.delete("/voiceprint/delete")
+        
+@router.post("/voiceprint/delete") # 仅仅改这一行，把 delete 改成 post
 async def delete_voiceprint(
     jabobo_id: str = Form(..., description="设备ID"),
     voiceprint_name: str = Form(..., description="声纹名称"),

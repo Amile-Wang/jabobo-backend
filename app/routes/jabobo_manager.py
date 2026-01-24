@@ -21,12 +21,33 @@ async def get_user_jabobo_ids(
     if not db.connect(): 
         raise HTTPException(status_code=500, detail="数据库连接失败")
     try:
+        # 新增print：打印请求基础信息（脱敏token，避免泄露）
+        print(f"===== [收到jabobo_ids请求] =====")
+        print(f"接收的x_username: {x_username}")
+        print(f"接收的Authorization（前10位）: {authorization[:10]}...")
+        
+        # 验证用户后打印（确认验证通过）
         verify_user(x_username, authorization)
-        # 查询该用户绑定的所有设备
-        db.cursor.execute("SELECT jabobo_id FROM user_personas WHERE username = %s", (x_username,))
+        print(f"✅ 身份验证通过：用户名={x_username}")
+        
+        # 新增print：打印执行的SQL语句（便于排查查询条件）
+        sql = "SELECT jabobo_id FROM user_personas WHERE username = %s"
+        print(f"🔍 执行SQL：{sql} | 参数：({x_username})")
+        
+        # 原有查询逻辑
+        db.cursor.execute(sql, (x_username,))
         rows = db.cursor.fetchall()
+        
+        # 新增print：打印查询到的行数（确认是否有数据）
+        print(f"📊 查询到的行数：{len(rows)}")
+        
+        # 原有数据处理逻辑
         ids = [row['jabobo_id'] for row in rows]
+        
+        # 原有print保留，补充完整上下文
         print(f"📋 [LIST] User: {x_username} | Devices: {ids}")
+        print(f"📤 返回结果：success=True, jabobo_ids={ids}")
+        
         return {"success": True, "jabobo_ids": ids}
     finally:
         db.close()
