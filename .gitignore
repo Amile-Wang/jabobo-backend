@@ -6,3 +6,4 @@ backend.log
 data/
 audio_data/
 .env
+logs/

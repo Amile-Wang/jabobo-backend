@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Header, Depends
 from app.models.user import UserCreateRequest, PasswordUpdateRequest
 from app.database import db
 from passlib.context import CryptContext
+from loguru import logger  # 引入 loguru
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -17,6 +18,7 @@ CLIENT_TOKEN_MAP = {
 def get_current_user(x_username: str = Header(...), authorization: str = Header(...)):
     # 1. 数据库连接校验
     if not db.connect():
+        logger.error("❌ [AUTH] 数据库连接失败")
         raise HTTPException(status_code=500, detail="数据库连接失败")
     
     try:
@@ -28,6 +30,7 @@ def get_current_user(x_username: str = Header(...), authorization: str = Header(
         # 3. 查询用户基础信息
         user = db.query_user(x_username)
         if not user:
+            logger.warning(f"⚠️ [AUTH] 用户不存在: {x_username}")
             raise HTTPException(status_code=401, detail="用户不存在")
         
         # 4. 校验token：优先按多端匹配，匹配不到则默认校验web_token
@@ -43,6 +46,7 @@ def get_current_user(x_username: str = Header(...), authorization: str = Header(
         
         # 5. token无效则返回401
         if not token_is_valid:
+            logger.warning(f"🛑 [AUTH] Token无效或过期: 用户 {x_username}")
             raise HTTPException(status_code=401, detail="登录已过期或身份无效")
         
         # 6. 返回完整用户信息
@@ -55,6 +59,7 @@ def get_current_user(x_username: str = Header(...), authorization: str = Header(
 @router.get("/users")
 async def list_users(current_user: dict = Depends(get_current_user)):
     if current_user['role'] != "Admin":
+        logger.warning(f"🚫 [ACCESS] 非管理员用户 {current_user['username']} 尝试访问用户列表")
         raise HTTPException(status_code=403, detail="权限不足")
     
     if not db.connect(): 
@@ -66,6 +71,7 @@ async def list_users(current_user: dict = Depends(get_current_user)):
         for u in users:
             if u.get('create_time'):
                 u['create_time'] = u['create_time'].strftime("%Y-%m-%d %H:%M:%S")
+        logger.info(f"👥 [LIST USERS] 管理员 {current_user['username']} 查询了用户列表，共 {len(users)} 人")
         return {"success": True, "data": users}
     finally:
         db.close()
@@ -81,14 +87,14 @@ async def delete_user(
     1. 必须是 Admin 权限。
     2. 禁止删除自己（防止管理员误锁死系统）。
     """
-    print(f"\n🗑️ [DELETE USER] Attempt by {current_user['username']} to delete {username}")
+    logger.info(f"🗑️ [DELETE USER] 管理员 {current_user['username']} 正在尝试删除用户：{username}")
 
     if current_user['role'] != "Admin":
-        print(f"❌ [DELETE FAILED] Permission denied for {current_user['username']}")
+        logger.warning(f"❌ [DELETE FAILED] 权限不足：{current_user['username']}")
         raise HTTPException(status_code=403, detail="权限不足，仅管理员可删除用户")
 
     if current_user['username'] == username:
-        print(f"❌ [DELETE FAILED] User {username} tried to delete themselves")
+        logger.warning(f"❌ [DELETE FAILED] 管理员 {username} 尝试删除自己")
         raise HTTPException(status_code=400, detail="禁止删除当前登录的管理员账号")
 
     if not db.connect(): 
@@ -98,22 +104,23 @@ async def delete_user(
         db.cursor.execute("SELECT id FROM user_login WHERE username = %s", (username,))
         target = db.cursor.fetchone()
         if not target:
+            logger.warning(f"🔍 [DELETE] 用户 {username} 不存在")
             raise HTTPException(status_code=404, detail="用户不存在")
 
         # 核心删除逻辑：删除登录信息
         db.cursor.execute("DELETE FROM user_login WHERE username = %s", (username,))
         
-        # 可选：同步清理该用户的设备配置数据
+        # 同步清理该用户的设备配置数据
         db.cursor.execute("DELETE FROM user_personas WHERE username = %s", (username,))
         
         # 提交事务
         db.cursor.connection.commit()
         
-        print(f"✅ [DELETE SUCCESS] User {username} and their configs have been removed")
+        logger.success(f"✅ [DELETE SUCCESS] 用户 {username} 及其配置已成功移除")
         return {"success": True, "message": f"用户 {username} 已成功删除"}
     
     except Exception as e:
-        print(f"🔥 [DELETE ERROR] {str(e)}")
+        logger.exception(f"🔥 [DELETE ERROR] 删除过程中发生异常: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除失败：{str(e)}")
     finally:
         db.close()
@@ -127,6 +134,7 @@ async def update_password(req: PasswordUpdateRequest, current_user: dict = Depen
         is_admin = current_user['role'] == "Admin"
         is_modifying_self = current_user['username'] == req.username
         if not (is_admin or is_modifying_self):
+            logger.warning(f"🛑 [PASSWORD] 用户 {current_user['username']} 无权修改 {req.username} 的密码")
             raise HTTPException(status_code=403, detail="无权修改他人密码")
 
         hashed_password = pwd_context.hash(req.new_password)
@@ -134,6 +142,7 @@ async def update_password(req: PasswordUpdateRequest, current_user: dict = Depen
         # 提交事务
         db.cursor.connection.commit()
         
+        logger.success(f"🔑 [PASSWORD] 用户 {req.username} 的密码已更新")
         return {"success": True, "message": "密码修改成功"}
     finally:
         db.close()
@@ -142,9 +151,10 @@ async def update_password(req: PasswordUpdateRequest, current_user: dict = Depen
 @router.post("/users")
 async def create_user(req: UserCreateRequest, current_user: dict = Depends(get_current_user)):
     if current_user['role'] != "Admin":
+        logger.warning(f"🚫 [CREATE] 非管理员 {current_user['username']} 尝试创建用户")
         raise HTTPException(status_code=403, detail="权限不足")
     
-    print(f"➕ [CREATE USER] Admin {current_user['username']} is creating user: {req.username}")
+    logger.info(f"➕ [CREATE USER] 管理员 {current_user['username']} 正在创建新用户: {req.username}")
 
     if not db.connect(): 
         raise HTTPException(status_code=500, detail="数据库连接失败")
@@ -155,9 +165,10 @@ async def create_user(req: UserCreateRequest, current_user: dict = Depends(get_c
         # 提交事务
         db.cursor.connection.commit()
         
+        logger.success(f"✅ [CREATE SUCCESS] 新用户 {req.username} 创建成功 (Role: {req.role})")
         return {"success": True, "message": "创建成功"}
     except Exception as e:
-        print(f"❌ [CREATE FAILED] {str(e)}")
+        logger.error(f"❌ [CREATE FAILED] 用户 {req.username} 创建失败: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         db.close()
