@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.routes import auth, users, jabobo_config, jabobo_manager, device_data_api, jabobo_knowlege, chat_config, jabobo_voice
+from app.routes import auth, users, jabobo_config, jabobo_manager, device_data_api, jabobo_knowlege, chat_config, jabobo_voice, app_management
 
 # --- 1. 定义禁用缓存中间件 ---
 class NoCacheMiddleware(BaseHTTPMiddleware):
@@ -46,6 +46,7 @@ app.include_router(device_data_api.router, prefix="/api", tags=["设备端请求
 app.include_router(jabobo_knowlege.router, prefix="/api", tags=["知识库管理"])
 app.include_router(chat_config.router, prefix="/api", tags=["聊天差异化配置"]) 
 app.include_router(jabobo_voice.router, prefix="/api", tags=["声纹管理"])
+app.include_router(app_management.router, prefix="/api", tags=["APP管理"])
 
 if __name__ == "__main__":
     import uvicorn
