@@ -140,23 +140,36 @@ async def download_firmware(filename: str):
     固件下载接口 - 用于OTA升级
     """
     print(f"📥 [FIRMWARE_DOWNLOAD] Firmware download requested: {filename}")
-    
-    # 确保文件名安全，防止路径遍历攻击
-    if filename != "Jabob.bin":
+
+    # 允许两种文件名：旧的 Jabob.bin 或新的 Jabobo_<version>.bin
+    allowed = False
+    if filename == "Jabob.bin":
+        allowed = True
+    elif filename.startswith("Jabobo_") and filename.endswith(".bin"):
+        allowed = True
+
+    if not allowed:
         print(f"❌ [FIRMWARE_DOWNLOAD] Invalid firmware filename: {filename}")
         raise HTTPException(status_code=404, detail="Firmware file not found")
-    
-    firmware_path = "/var/local/jobobo-backend/OTA/Jabob.bin"
-    
-    # 检查文件是否存在
+
+    # 优先在 OTA 目录中查找与请求名称匹配的文件
+    ota_dir = "/var/local/jobobo-backend/OTA"
+    firmware_path = os.path.join(ota_dir, filename)
+
+    # 如果版本化文件不存在，回退到通用 Jabob.bin（保持向后兼容）
     if not os.path.exists(firmware_path):
-        print(f"❌ [FIRMWARE_DOWNLOAD] Firmware file not found at path: {firmware_path}")
-        raise HTTPException(status_code=404, detail="Firmware file not found")
-    
+        fallback = os.path.join(ota_dir, "Jabob.bin")
+        if os.path.exists(fallback):
+            firmware_path = fallback
+            print(f"⚠️ [FIRMWARE_DOWNLOAD] Requested {filename} not found, falling back to {fallback}")
+        else:
+            print(f"❌ [FIRMWARE_DOWNLOAD] Firmware file not found at path: {firmware_path}")
+            raise HTTPException(status_code=404, detail="Firmware file not found")
+
     file_size = os.path.getsize(firmware_path)
     print(f"✅ [FIRMWARE_DOWNLOAD] Found firmware file: {firmware_path}, size: {file_size} bytes")
 
-    # ✅ 使用 FileResponse，直接传路径
+    # 返回文件，Content-Disposition 名称使用请求的文件名
     return FileResponse(
         path=firmware_path,
         filename=filename,
@@ -227,7 +240,44 @@ async def handle_ota_request(
     finally:
         db.close()
     
+    # 优先使用设备上报的 application.version 作为固件版本；依次回退到其他可能的字段或默认值
+    app_version = (
+        (device_info.get("application") or {}).get("version")
+        or "2.0.9"
+    )
+
+    # 优先从数据库读取该设备对应的 expected_version（若存在且非空则覆盖 app_version）
+    firmware_version = app_version
+    try:
+        if db.connect():
+            try:
+                sql = "SELECT expected_version FROM user_personas WHERE jabobo_id = %s"
+                db.cursor.execute(sql, (device_id,))
+                row = db.cursor.fetchone()
+                if row:
+                    # row 预期为 dict-like
+                    ev = None
+                    try:
+                        ev = row.get("expected_version")
+                    except Exception:
+                        # 如果是 tuple/list，也尝试取第一个元素
+                        try:
+                            ev = row[0]
+                        except Exception:
+                            ev = None
+                    if ev:
+                        firmware_version = ev
+            finally:
+                db.close()
+    except Exception as e:
+        print(f"⚠️ [OTA] Failed to read expected_version for {device_id}: {str(e)}")
+
     # 构造响应，按照设备期望的格式
+    # 生成带版本的固件文件名，例如 Jabobo_2.0.3.bin
+    safe_ver = str(firmware_version).replace(' ', '_')
+    download_filename = f"Jabobo_{safe_ver}.bin"
+    download_url = f"http://121.41.168.85:8007/api/xiaozhi/otaMag/download/{download_filename}"
+
     response_data = {
         "server_time": {
             "timestamp": timestamp,
@@ -235,9 +285,8 @@ async def handle_ota_request(
             "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
         },
         "firmware": {
-            # "version": device_info.get("application", {}).get("version", "2.0.2"),  # 使用设备application中的版本号
-            "version": "2.0.3",
-            "url": "http://121.41.168.85:8007/api/xiaozhi/otaMag/download/Jabob.bin",  # Updated to point to actual firmware file
+            "version": firmware_version,
+            "url": download_url,
             "force": 0
         },
         "websocket": {
@@ -252,6 +301,35 @@ async def handle_ota_request(
     else:
         
         print(f"🔓 [OTA ACTIVATION] No activation needed for registered device {device_id}")
+    
+    # 在返回响应前，更新数据库中的设备版本号
+    # 获取设备上报的当前版本号（如果有的话）
+    current_version = app_version
+    # 如果存在当前版本号，则更新数据库
+    if current_version and device_id:
+        if not db.connect():
+            print(f"❌ [VERSION UPDATE ERROR] Database connection failed when updating version for device {device_id}")
+        else:
+            try:
+                # 更新设备的当前版本号
+                update_sql = "UPDATE user_personas SET current_version = %s WHERE jabobo_id = %s"
+                db.cursor.execute(update_sql, (current_version, device_id))
+                db.connection.commit()
+                
+                affected_rows = db.cursor.rowcount
+                if affected_rows > 0:
+                    print(f"🔄 [VERSION UPDATE] Successfully updated device {device_id} current version to {current_version}")
+                else:
+                    print(f"⚠️ [VERSION UPDATE] No device found with ID {device_id} for version update")
+                    
+            except Exception as e:
+                print(f"❌ [VERSION UPDATE ERROR] Failed to update device {device_id} version: {str(e)}")
+                try:
+                    db.connection.rollback()
+                except:
+                    pass
+            finally:
+                db.close()
     
     return response_data
 
