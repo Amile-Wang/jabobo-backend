@@ -7,4 +7,5 @@ data/
 audio_data/
 .env
 logs/
-jobobo-backend/JABOBO/models/SenseVoiceSmall/model.pt
+
+JABOBO/models/SenseVoiceSmall/model.pt
