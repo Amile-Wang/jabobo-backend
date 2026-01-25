@@ -1,15 +1,16 @@
 from fastapi import APIRouter, HTTPException, Query, Header, Response
 from fastapi.responses import FileResponse, StreamingResponse
-from app.database import db, unactivated_macs, activation_codes  # 复用你已有的数据库实例和全局数组
+from app.database import db, unactivated_macs, activation_codes  # 复用已有的数据库实例和全局数组
 import json
 from datetime import datetime, timezone
 import time
 import hashlib
 import os
-from fastapi.requests import Request  # 添加这一行
+from fastapi.requests import Request
+from loguru import logger  # 导入 loguru
 
 router = APIRouter()
-#这个接口后面可以用来做OTA
+
 # 无需鉴权：通过jabobo_id读取设备所有数据
 @router.get("/user/device/full_data")
 async def get_device_full_data(
@@ -21,6 +22,7 @@ async def get_device_full_data(
     
     # 2. 数据库连接校验
     if not db.connect():
+        logger.error("❌ [FULL_DATA] 数据库连接失败")
         raise HTTPException(status_code=500, detail="数据库连接失败")
     
     try:
@@ -31,14 +33,15 @@ async def get_device_full_data(
         
         # 4. 无数据处理
         if not device_data:
+            logger.warning(f"⚠️ [FULL_DATA] 未找到ID为 {jabobo_id} 的设备数据")
             return {
                 "success": False,
                 "message": f"未找到ID为 {jabobo_id} 的设备数据",
                 "data": None
             }
         
-        # 5. 日志打印（保持和你原有接口一致的风格）
-        print(f"📄 [FULL_DATA_NO_AUTH] Device: {jabobo_id} | Data: {device_data}")
+        # 5. 日志打印
+        logger.info(f"📄 [FULL_DATA_NO_AUTH] Device: {jabobo_id} | Data: {device_data}")
         
         # 6. 返回全量数据
         return {
@@ -57,20 +60,21 @@ async def update_device_version(
     current_version: str = Query(None, description="要设置的当前版本号（如1.0）"),
     expected_version: str = Query(None, description="要设置的预期版本号（如1.1）")
 ):
-    # 1. 设备ID非空校验（和原有接口保持一致）
+    # 1. 设备ID非空校验
     if not jabobo_id.strip():
         raise HTTPException(status_code=400, detail="设备ID不能为空")
     
-    # 2. 版本号参数校验：至少传入一个版本号字段用于更新
+    # 2. 版本号参数校验
     if current_version is None and expected_version is None:
         raise HTTPException(status_code=400, detail="至少需要传入current_version或expected_version其中一个字段")
     
-    # 3. 数据库连接校验（和原有接口保持一致）
+    # 3. 数据库连接校验
     if not db.connect():
+        logger.error("❌ [UPDATE_VERSION] 数据库连接失败")
         raise HTTPException(status_code=500, detail="数据库连接失败")
     
     try:
-        # 4. 构造动态更新SQL（只更新传入的非空版本号字段）
+        # 4. 构造动态更新SQL
         update_fields = []
         update_params = []
         
@@ -82,29 +86,26 @@ async def update_device_version(
             update_fields.append("expected_version = %s")
             update_params.append(expected_version.strip())
         
-        # 拼接SQL语句
         sql = f"UPDATE user_personas SET {', '.join(update_fields)} WHERE jabobo_id = %s"
-        # 补充设备ID参数
         update_params.append(jabobo_id)
         
         # 5. 执行更新操作
         db.cursor.execute(sql, tuple(update_params))
-        # 核心修复1：将 db.conn 改为 db.connection（MySQLConnector 类的正确连接属性名）
         db.connection.commit()
         
         # 6. 处理更新结果
         affected_rows = db.cursor.rowcount
         if affected_rows == 0:
+            logger.warning(f"⚠️ [UPDATE_VERSION] 更新失败，未找到设备: {jabobo_id}")
             return {
                 "success": False,
                 "message": f"未找到ID为 {jabobo_id} 的设备数据，更新失败",
                 "data": None
             }
         
-        # 7. 日志打印（保持和原有接口一致的风格）
-        print(f"🔄 [UPDATE_VERSION] Device: {jabobo_id} | CurrentVersion: {current_version or '1.0.0'} | ExpectedVersion: {expected_version or '1.0.0'} | AffectedRows: {affected_rows}")
+        # 7. 日志打印
+        logger.success(f"🔄 [UPDATE_VERSION] Device: {jabobo_id} | Current: {current_version} | Expected: {expected_version} | Affected: {affected_rows}")
         
-        # 8. 返回成功结果
         return {
             "success": True,
             "message": "设备版本号更新成功",
@@ -116,25 +117,21 @@ async def update_device_version(
         }
     
     except Exception as e:
-        # 核心修复2：将 db.conn 改为 db.connection
         try:
-            # 增加容错：如果连接已关闭，跳过回滚
             if db.connection and not db.connection.closed:
                 db.connection.rollback()
         except:
             pass
         
-        print(f"❌ [UPDATE_VERSION_ERROR] Device: {jabobo_id} | Error: {str(e)}")
+        logger.error(f"❌ [UPDATE_VERSION_ERROR] Device: {jabobo_id} | Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"版本号更新失败：{str(e)}")
     
     finally:
-        # 9. 确保关闭数据库连接（和原有接口保持一致）
         db.close()
-        
-# 添加固件下载路由
 
+# 添加固件下载路由
 @router.get("/xiaozhi/otaMag/download/{filename}")
-@router.head("/xiaozhi/otaMag/download/{filename}")  # ✅ 添加 HEAD 支持
+@router.head("/xiaozhi/otaMag/download/{filename}")
 async def download_firmware(filename: str):
     """
     固件下载接口 - 用于OTA升级
@@ -167,7 +164,7 @@ async def download_firmware(filename: str):
             raise HTTPException(status_code=404, detail="Firmware file not found")
 
     file_size = os.path.getsize(firmware_path)
-    print(f"✅ [FIRMWARE_DOWNLOAD] Found firmware file: {firmware_path}, size: {file_size} bytes")
+    logger.success(f"✅ [FIRMWARE_DOWNLOAD] Serving firmware: {filename}, size: {file_size} bytes")
 
     # 返回文件，Content-Disposition 名称使用请求的文件名
     return FileResponse(
@@ -180,8 +177,7 @@ async def download_firmware(filename: str):
             "Content-Length": str(file_size),
         }
     )
-        
-        # OTA接口：接收设备发送的OTA请求
+
 # OTA接口：接收设备发送的OTA请求
 @router.post("/user/device/ota")
 async def handle_ota_request(
@@ -194,48 +190,43 @@ async def handle_ota_request(
     """
     处理设备发送的OTA请求
     """
-    print(f"OTA request received - Device-Id: {device_id}, Client-Id: {client_id}")
-    print(f"User-Agent: {user_agent}, Activation-Version: {activation_version}")
-    print(f"Device Info: {json.dumps(device_info, indent=2, ensure_ascii=False)}")
+    logger.info(f"🚀 [OTA_REQUEST] Device-Id: {device_id} | Client-Id: {client_id}")
+    logger.debug(f"OTA Context: UA={user_agent}, Version={activation_version}")
     
-    # 获取当前时间戳（毫秒）
     now = datetime.now(timezone.utc)
     timestamp = int(time.mktime(now.timetuple()) * 1000 + now.microsecond / 1000)
     
-    # 检查数据库中是否存在与设备ID匹配的jabobo_id
     if not db.connect():
+        logger.error("❌ [OTA_REQUEST] 数据库连接失败")
         raise HTTPException(status_code=500, detail="数据库连接失败")
     
     try:
-        print(f"🔍 [OTA CHECK] Checking if device {device_id} is already registered...")
+        logger.debug(f"🔍 [OTA CHECK] Checking registration for {device_id}")
         
-        # 查询数据库中是否存在该设备ID
         sql = "SELECT username FROM user_personas WHERE jabobo_id = %s"
         db.cursor.execute(sql, (device_id,))
         existing_device = db.cursor.fetchone()
         
-        # 根据设备ID是否存在来决定是否需要激活
+        activation_obj = None
+        activation_code = None
+        
         if existing_device:
-            # 如果设备ID已存在，不返回激活对象
-            print(f"✅ [OTA CHECK] Device {device_id} is already registered to user: {existing_device.get('username', 'unknown')}")
-            activation_obj = None
-            activation_code = None
+            logger.info(f"✅ [OTA CHECK] Device {device_id} is registered to: {existing_device.get('username')}")
         else:
-            # 如果设备ID不存在，生成激活码并返回激活对象
-            print(f"❌ [OTA CHECK] Device {device_id} is not registered, generating activation code...")
+            logger.warning(f"❌ [OTA CHECK] Device {device_id} not registered, generating activation...")
             mac_address = device_info.get("mac_address", "00:00:00:00:00:00")
-            activation_code =generate_activation_code_from_mac(mac_address)
+            activation_code = generate_activation_code_from_mac(mac_address)
+            
             if mac_address not in unactivated_macs:
                 unactivated_macs.append(mac_address)
                 activation_codes.append(activation_code)
-                
-            print(f"➕ [OTA ACTIVATION] 当前未激活的MAC地址和激活码：{unactivated_macs} {activation_codes}" )
-            # activation_obj = None
+            
+            logger.debug(f"➕ [OTA ACTIVATION] Unactivated Pool: {len(unactivated_macs)} items")
             
             activation_obj = { 
                 "code": activation_code,
                 "message": f"http://xiaozhi.server.com\n{activation_code}",
-                "challenge": mac_address  # 使用MAC地址作为挑战码
+                "challenge": mac_address
             }
     finally:
         db.close()
@@ -294,7 +285,7 @@ async def handle_ota_request(
         "server_time": {
             "timestamp": timestamp,
             "timeZone": "Asia/Shanghai",
-            "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
+            "timezone_offset": 480
         },
         "firmware": {
             "version": safe_ver,
@@ -306,13 +297,11 @@ async def handle_ota_request(
         }
     }
     
-    # 只有在设备未注册时才添加激活对象
     if activation_obj:
         response_data["activation"] = activation_obj
-        print(f"🔐 [OTA ACTIVATION] Activation code {activation_code} generated for unregistered device {device_id}")
+        logger.success(f"🔐 [OTA ACTIVATION] Code {activation_code} assigned to {device_id}")
     else:
-        
-        print(f"🔓 [OTA ACTIVATION] No activation needed for registered device {device_id}")
+        logger.info(f"🔓 [OTA ACTIVATION] No activation needed for {device_id}")
     
     # 在返回响应前，更新数据库中的设备版本号
     # 获取设备上报的当前版本号（如果有的话）
@@ -348,20 +337,14 @@ async def handle_ota_request(
 def generate_activation_code_from_mac(mac_address: str) -> str:
     """
     从MAC地址生成固定的6位数字激活码
-    相同的MAC地址总是生成相同的激活码
     """
-    # 清除MAC地址中的分隔符（冒号、破折号、空格等）
     clean_mac = ''.join(c for c in mac_address if c.isalnum()).lower()
-    
-    # 使用MD5哈希确保相同MAC地址在不同运行时始终生成相同的激活码
     hash_object = hashlib.md5(clean_mac.encode())
     hex_dig = hash_object.hexdigest()
     
-    # 取哈希值的前8位并转换为整数，然后取模确保是6位数字
-    # 将十六进制转换为十进制，并限制在6位数字范围内
-    hex_part = hex_dig[:8]  # 取前8位十六进制字符
-    int_value = int(hex_part, 16)  # 转换为整数
-    activation_code = str(int_value % 1000000).zfill(6)  # zfill确保是6位，不足前面补0
+    hex_part = hex_dig[:8]
+    int_value = int(hex_part, 16)
+    activation_code = str(int_value % 1000000).zfill(6)
     
     return activation_code
 
@@ -374,45 +357,35 @@ async def activate_device(
     activation_version: str = Header(None, alias="Activation-Version")
 ):
     """
-    激活设备端点：通过激活码激活设备
-    激活成功返回200状态码，激活失败返回203状态码
+    激活设备端点
     """
-    print(f"Activation request received - Device-Id: {device_id}")
+    logger.info(f"🔑 [ACTIVATION_TRY] Received for Device-Id: {device_id}")
     
-    # 检查数据库连接
     if not db.connect():
+        logger.error("❌ [ACTIVATION] 数据库连接失败")
         return {"success": False, "message": "数据库连接失败", "status": "failed"}, 500
+
     try:
-        print(f"🔍 [OTA CHECK] Checking if device {device_id} is already registered...")
-        
-        # 查询数据库中是否存在该设备ID
         sql = "SELECT username FROM user_personas WHERE jabobo_id = %s"
         db.cursor.execute(sql, (device_id,))
         existing_device = db.cursor.fetchone()
         
-        activation_index = unactivated_macs.index(device_id)
-        
-        
-        # 根据设备ID是否存在来检查是否激活成功
         if existing_device:
-            # 如果设备ID已存在，返回200状态码
-            print(f"✅ [OTA CHECK] Device {device_id} is already registered to user: {existing_device.get('username', 'unknown')}")
-            unactivated_macs.pop(activation_index)
-            activation_codes.pop(activation_index)
-            # 返回200状态码表示激活成功
+            logger.success(f"✅ [ACTIVATION_SUCCESS] Device {device_id} verified")
+            try:
+                activation_index = unactivated_macs.index(device_id)
+                unactivated_macs.pop(activation_index)
+                activation_codes.pop(activation_index)
+            except ValueError:
+                pass # 已从待激活列表移除
             return 200
-
         else:
-            # 如果设备ID不存在，返回203状态码
-            print(f"❌ [OTA CHECK] Device {device_id} is not registered, activation failed.")
-            # 延迟5秒
+            logger.warning(f"❌ [ACTIVATION_FAILED] Device {device_id} not in DB")
             time.sleep(5)
-            return  203
+            return 203
     except Exception as e:
-        print(f"❌ [ACTIVATION] Activation failed with error: {str(e)}")
-        # 延迟5秒
+        logger.error(f"❌ [ACTIVATION_ERROR] {str(e)}")
         time.sleep(5)
-        # 返回203状态码表示激活失败
         return 203
     finally:
         db.close()
