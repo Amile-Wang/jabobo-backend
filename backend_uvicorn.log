@@ -1,0 +1,121 @@
+2026-01-24 22:27:27.413 | DEBUG    | app.database:__init__:10 - 正在初始化 MySQLConnector...
+2026-01-24 22:27:27.416 | SUCCESS  | app.database:_load_config:46 - ✅ 数据库配置加载成功
+INFO:     Started server process [231659]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8007 (Press CTRL+C to quit)
+2026-01-24 22:27:40.282 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:40.284 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:40.296 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:40.299 | INFO     | app.routes.jabobo_config:get_user_config:63 - 🔍 [GET CONFIG] User: Alice | Device: 80:b5:4e:e1:7c:30
+2026-01-24 22:27:40.299 | DEBUG    | app.routes.jabobo_config:get_user_config:64 - 📊 Data Stats: Persona: 156 chars | Memory: 486 chars
+2026-01-24 22:27:40.299 | INFO     | app.routes.jabobo_config:get_user_config:65 - 📌 Version: Current=1.0.0 | Expected=1.0.0
+2026-01-24 22:27:40.299 | DEBUG    | app.database:close:85 - 🔌 数据库连接已安全关闭
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: bbd631de-d71e-41c3-8482-b466da2ab095
+清洗后的token: bbd631de-d71e-41c3-8482-b466da2ab095
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'bbd631de-d71e-41c3-8482-b466da2ab095', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=bbd631de-d71e-41c3-8482-b466da2ab095
+比对android_token: 数据库值=bbd631de-d71e-41c3-8482-b466da2ab095 | 请求值=bbd631de-d71e-41c3-8482-b466da2ab095
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:27:40
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:27:40
+INFO:     163.181.32.160:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769264859160 HTTP/1.0" 200 OK
+2026-01-24 22:27:42.384 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:42.386 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:42.387 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+
+===== 开始处理音频文件查询请求 ===== | 时间：2026-01-24 22:27:42
+[请求信息] 用户名：Alice | 设备ID：80:b5:4e:e1:7c:30
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: bbd631de-d71e-41c3-8482-b466da2ab095
+清洗后的token: bbd631de-d71e-41c3-8482-b466da2ab095
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'bbd631de-d71e-41c3-8482-b466da2ab095', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=bbd631de-d71e-41c3-8482-b466da2ab095
+比对android_token: 数据库值=bbd631de-d71e-41c3-8482-b466da2ab095 | 请求值=bbd631de-d71e-41c3-8482-b466da2ab095
+✅ 身份验证通过
+
+[数据库操作] 开始查询音频文件列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:27:42
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:27:42
+[数据库操作] 执行查询SQL：SELECT audio_status FROM user_personas WHERE jabobo_id = %s | 参数：(80:b5:4e:e1:7c:30)
+[数据库操作] 查询结果：{'audio_status': '[{"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav", "file_size_bytes": 63404, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "你考一考我吧。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:03:36", "upload_timestamp": 1768831416, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav", "file_size_bytes": 65324, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "一共有5个。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:03:51", "upload_timestamp": 1768831431, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav", "file_size_bytes": 103724, "file_size_mb": 0.1, "audio_format": "wav", "audio_content": "请你把音量调到30%。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:04:08", "upload_timestamp": 1768831448, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav", "file_size_bytes": 73004, "file_size_mb": 0.07, "audio_format": "wav", "audio_content": "你给我出一道一。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:06:14", "upload_timestamp": 1768831574, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav", "file_size_bytes": 80684, "file_size_mb": 0.08, "audio_format": "wav", "audio_content": "给我出一个数学题。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:06:42", "upload_timestamp": 1768831602, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav", "file_size_bytes": 67244, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "还剩三个呢。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:06:57", "upload_timestamp": 1768831617, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav", "file_size_bytes": 76844, "file_size_mb": 0.07, "audio_format": "wav", "audio_content": "介绍一下你自己。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:07:37", "upload_timestamp": 1768831657, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav", "file_size_bytes": 59564, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "给我出一道题。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:08:02", "upload_timestamp": 1768831682, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav", "file_size_bytes": 49964, "file_size_mb": 0.05, "audio_format": "wav", "audio_content": "只吗？", "speaker": "未知说话人", "upload_time": "2026-01-19 22:08:25", "upload_timestamp": 1768831705, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav", "file_size_bytes": 49964, "file_size_mb": 0.05, "audio_format": "wav", "audio_content": "5只啊是不是5？", "speaker": "未知说话人", "upload_time": "2026-01-19 22:08:39", "upload_timestamp": 1768831719, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}]'}
+[数据解析] 解析音频JSON成功 - 列表长度：10
+[数据处理] 处理第 1 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav', 'file_size_bytes': 63404, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '你考一考我吧。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:03:36', 'upload_timestamp': 1768831416, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav
+[文件检查] 存在 - 音频文件大小：63404 字节
+[数据处理] 处理第 2 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav', 'file_size_bytes': 65324, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '一共有5个。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:03:51', 'upload_timestamp': 1768831431, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav
+[文件检查] 存在 - 音频文件大小：65324 字节
+[数据处理] 处理第 3 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav', 'file_size_bytes': 103724, 'file_size_mb': 0.1, 'audio_format': 'wav', 'audio_content': '请你把音量调到30%。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:04:08', 'upload_timestamp': 1768831448, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}2026-01-24 22:27:42.389 | DEBUG    | app.database:close:85 - 🔌 数据库连接已安全关闭
+
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav
+[文件检查] 存在 - 音频文件大小：103724 字节
+[数据处理] 处理第 4 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav', 'file_size_bytes': 73004, 'file_size_mb': 0.07, 'audio_format': 'wav', 'audio_content': '你给我出一道一。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:06:14', 'upload_timestamp': 1768831574, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav
+[文件检查] 存在 - 音频文件大小：73004 字节
+[数据处理] 处理第 5 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav', 'file_size_bytes': 80684, 'file_size_mb': 0.08, 'audio_format': 'wav', 'audio_content': '给我出一个数学题。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:06:42', 'upload_timestamp': 1768831602, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav
+[文件检查] 存在 - 音频文件大小：80684 字节
+[数据处理] 处理第 6 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav', 'file_size_bytes': 67244, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '还剩三个呢。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:06:57', 'upload_timestamp': 1768831617, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav
+[文件检查] 不存在
+[数据处理] 处理第 7 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav', 'file_size_bytes': 76844, 'file_size_mb': 0.07, 'audio_format': 'wav', 'audio_content': '介绍一下你自己。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:07:37', 'upload_timestamp': 1768831657, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav
+[文件检查] 存在 - 音频文件大小：76844 字节
+[数据处理] 处理第 8 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav', 'file_size_bytes': 59564, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '给我出一道题。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:08:02', 'upload_timestamp': 1768831682, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav
+[文件检查] 存在 - 音频文件大小：59564 字节
+[数据处理] 处理第 9 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav', 'file_size_bytes': 49964, 'file_size_mb': 0.05, 'audio_format': 'wav', 'audio_content': '只吗？', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:08:25', 'upload_timestamp': 1768831705, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav
+[文件检查] 存在 - 音频文件大小：49964 字节
+[数据处理] 处理第 10 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav', 'file_size_bytes': 49964, 'file_size_mb': 0.05, 'audio_format': 'wav', 'audio_content': '5只啊是不是5？', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:08:39', 'upload_timestamp': 1768831719, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav
+[文件检查] 存在 - 音频文件大小：49964 字节
+
+[查询完成] 成功 - 共查询到 10 条音频记录 | 时间：2026-01-24 22:27:42
+===== 音频查询请求处理完成 ===== | 时间：2026-01-24 22:27:42
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 22:27:42
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.162:0 - "GET /api/user/list-audio?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769264861357 HTTP/1.0" 200 OK
+2026-01-24 22:27:43.503 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:43.505 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:43.506 | INFO     | app.database:connect:62 - 🔗 数据库连接已建立: 127.0.0.1/jabobo
+2026-01-24 22:27:43.507 | DEBUG    | app.database:close:85 - 🔌 数据库连接已安全关闭
+
+===== 开始处理声纹列表查询请求 ===== | 时间：2026-01-24 22:27:43
+[请求信息] 用户名：Alice | 设备ID：80:b5:4e:e1:7c:30
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: bbd631de-d71e-41c3-8482-b466da2ab095
+清洗后的token: bbd631de-d71e-41c3-8482-b466da2ab095
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'bbd631de-d71e-41c3-8482-b466da2ab095', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=bbd631de-d71e-41c3-8482-b466da2ab095
+比对android_token: 数据库值=bbd631de-d71e-41c3-8482-b466da2ab095 | 请求值=bbd631de-d71e-41c3-8482-b466da2ab095
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:27:43
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:27:43
+[数据库操作] 执行查询SQL：SELECT voiceprint_list FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Alice, 80:b5:4e:e1:7c:30)
+[数据解析] 解析JSON成功 - 列表长度：1
+[数据处理] 处理第 1 条声纹记录：{'voiceprint_name': '欣欣', 'speaker_id': '80:b5:4e:e1:7c:30_欣欣', 'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_204434_是叫星星，我现在5岁.wav', 'file_size_bytes': 105644, 'file_size_mb': 0.1, 'create_time': '2026-01-19 20:47:12', 'create_timestamp': 1768826832.881129}
+
+[查询完成] 成功 - 共查询到 1 条声纹记录 | 时间：2026-01-24 22:27:43
+===== 声纹列表查询请求处理完成 ===== | 时间：2026-01-24 22:27:43
+
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.175:0 - "GET /api/voiceprint/list?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769264862462 HTTP/1.0" 200 OK

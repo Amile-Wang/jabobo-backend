@@ -1,94 +1,1613 @@
-INFO:     Will watch for changes in these directories: ['/var/local']
+INFO:     Started server process [228435]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8007 (Press CTRL+C to quit)
-INFO:     Started reloader process [940812] using StatReload
-Process SpawnProcess-1:
-Traceback (most recent call last):
-  File "/root/miniconda3/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
-    self.run()
-    ~~~~~~~~^^
-  File "/root/miniconda3/lib/python3.13/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
-    target(sockets=sockets)
-    ~~~~~~^^^^^^^^^^^^^^^^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/root/miniconda3/lib/python3.13/asyncio/runners.py", line 195, in run
-    return runner.run(main)
-           ~~~~~~~~~~^^^^^^
-  File "/root/miniconda3/lib/python3.13/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
-  File "/root/miniconda3/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
-    return future.result()
-           ~~~~~~~~~~~~~^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
-    await self._serve(sockets)
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
-    config.load()
-    ~~~~~~~~~~~^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
-    self.loaded_app = import_from_string(self.app)
-                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
-    raise exc from None
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/root/miniconda3/lib/python3.13/importlib/__init__.py", line 88, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
-ModuleNotFoundError: No module named 'app'
-WARNING:  StatReload detected changes in 'jobobo-backend/app/routes/device_data_api.py'. Reloading...
-Process SpawnProcess-2:
-Traceback (most recent call last):
-  File "/root/miniconda3/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
-    self.run()
-    ~~~~~~~~^^
-  File "/root/miniconda3/lib/python3.13/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
-    target(sockets=sockets)
-    ~~~~~~^^^^^^^^^^^^^^^^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/root/miniconda3/lib/python3.13/asyncio/runners.py", line 195, in run
-    return runner.run(main)
-           ~~~~~~~~~~^^^^^^
-  File "/root/miniconda3/lib/python3.13/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
-  File "/root/miniconda3/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
-    return future.result()
-           ~~~~~~~~~~~~~^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/server.py", line 71, in serve
-    await self._serve(sockets)
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/server.py", line 78, in _serve
-    config.load()
-    ~~~~~~~~~~~^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/config.py", line 439, in load
-    self.loaded_app = import_from_string(self.app)
-                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
-    raise exc from None
-  File "/root/miniconda3/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/root/miniconda3/lib/python3.13/importlib/__init__.py", line 88, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
-ModuleNotFoundError: No module named 'app'
+🚀 [APP DOWNLOAD] 2026-01-24 21:15:41 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:24 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:27 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:33 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:38 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:43 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:46 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:50 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:54 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:16:58 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:02 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:08 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:11 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:15 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:19 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:26 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:29 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:33 - Serving: jabobo.apk
+INFO:     163.181.32.168:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:37 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:40 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:17:43 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+===== [收到jabobo_ids请求] =====
+接收的x_username: Alice
+接收的Authorization（前10位）: 27b7b7eb-c...
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: 27b7b7eb-c5e5-42d8-858d-76b8814eb9fd
+清洗后的token: 27b7b7eb-c5e5-42d8-858d-76b8814eb9fd
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': '27b7b7eb-c5e5-42d8-858d-76b8814eb9fd', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=27b7b7eb-c5e5-42d8-858d-76b8814eb9fd
+比对android_token: 数据库值=27b7b7eb-c5e5-42d8-858d-76b8814eb9fd | 请求值=27b7b7eb-c5e5-42d8-858d-76b8814eb9fd
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Alice
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Alice)
+📊 查询到的行数：1
+📋 [LIST] User: Alice | Devices: ['80:b5:4e:e1:7c:30']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e1:7c:30']
+INFO:     163.181.32.175:0 - "GET /api/user/jabobo_ids?_t=1769260693155 HTTP/1.0" 200 OK
+INFO:     47.92.52.18:38696 - "GET / HTTP/1.0" 404 Not Found
+INFO:     47.92.52.18:42040 - "GET /nice%20ports%2C/Trinity.txt.bak HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     47.92.52.18:44134 - "OPTIONS / HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+🚀 [APP DOWNLOAD] 2026-01-24 21:20:31 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:20:39 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:20:42 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+WARNING:  Invalid HTTP request received.
+🚀 [APP DOWNLOAD] 2026-01-24 21:20:43 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:20:45 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     163.181.32.182:0 - "GET /api/app HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     163.181.32.161:0 - "GET /api/app HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+🚀 [APP DOWNLOAD] 2026-01-24 21:32:58 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:33:41 - Serving: jabobo.apk
+INFO:     163.181.32.168:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:33:42 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:33:44 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:33:46 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:33:53 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:05 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:12 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:15 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:16 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:18 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:19 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:21 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:23 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:24 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:25 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:26 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:27 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:27 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:27 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:28 - Serving: jabobo.apk
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:28 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:29 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:30 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:30 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:30 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:30 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:31 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:32 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:32 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:35 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:35 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:35 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:36 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:37 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:37 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:40 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:40 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:42 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:38:43 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+
+==================================================
+📲 登录请求接收开始
+==================================================
+请求体原始数据：{'username': 'Alice', 'password': '123456', 'client_type': <ClientType.ANDROID: 'android'>}
+用户名：Alice
+密码（密文校验前）：123456****
+前端传的client_type：ClientType.ANDROID
+client_type类型：<enum 'ClientType'>
+
+🔌 数据库连接校验
+数据库连接结果：True
+
+👤 查询用户信息
+用户查询结果：{'id': 10, 'username': 'Alice', 'password': '$2b$12$qrgp0pHklrPunK5843G6ouEDaqpOs462c6xldrHupMq/ccqokVhmi', 'role': 'User', 'session_token': None, 'token_expires': None, 'create_time': datetime.datetime(2026, 1, 12, 6, 53, 20), 'client_type': 'web', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': '27b7b7eb-c5e5-42d8-858d-76b8814eb9fd', 'ios_token': None}
+
+🔐 密码校验
+🔍 正在校验密码...
+   - 输入的明文: 123456
+   - 数据库中的值: $2b$12$qrgp0pHklrPunK5843G6ouEDaqpOs462c6xldrHupMq/ccqokVhmi
+✅ 密码校验通过！
+密码校验结果：True
+
+📱 客户端类型处理
+原始client_type：ClientType.ANDROID
+转小写后client_type：android
+匹配的token字段：android_token（映射表：{'web': 'web_token', 'android': 'android_token', 'ios': 'ios_token'}）
+
+🔑 生成专属token
+生成的token：c8e9c000-dc7d-4424-8e23-9d1a23b42037
+
+🗄️ 数据库更新操作
+更新SQL：UPDATE user_login SET android_token = %s WHERE username = %s
+SQL参数：token=c8e9c000-dc7d-4424-8e23-9d1a23b42037, username=Alice
+SQL执行影响行数：1
+
+✅ 提交数据库事务
+事务提交成功
+
+🔍 验证数据库更新结果
+更新后用户token信息：{'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+
+📤 登录成功，返回结果
+
+🔌 关闭数据库连接
+==================================================
+📲 登录请求处理结束
+==================================================
+
+INFO:     163.181.32.167:0 - "POST /api/login HTTP/1.0" 200 OK
+===== [收到jabobo_ids请求] =====
+接收的x_username: Alice
+接收的Authorization（前10位）: c8e9c000-d...
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Alice
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Alice)
+📊 查询到的行数：1
+📋 [LIST] User: Alice | Devices: ['80:b5:4e:e1:7c:30']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e1:7c:30']
+INFO:     163.181.32.170:0 - "GET /api/user/jabobo_ids?_t=1769262006020 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:40:10
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:40:10
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 21:40:10
+   👤 User: Alice
+   🆔 Target Device: 80:b5:4e:e1:7c:30
+   📦 Data Found: 156 chars of persona, 486 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id":"p1","name":"默认人设","content":"你是安安欣欣的捷宝宝，安安...
+--------------------------------------------------
+INFO:     163.181.32.179:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262008513 HTTP/1.0" 200 OK
+===== [收到jabobo_ids请求] =====
+接收的x_username: Alice
+接收的Authorization（前10位）: c8e9c000-d...
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Alice
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Alice)
+📊 查询到的行数：1
+📋 [LIST] User: Alice | Devices: ['80:b5:4e:e1:7c:30']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e1:7c:30']
+INFO:     163.181.32.176:0 - "GET /api/user/jabobo_ids?_t=1769262025239 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:40:30
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:40:30
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 21:40:30
+   👤 User: Alice
+   🆔 Target Device: 80:b5:4e:e1:7c:30
+   📦 Data Found: 156 chars of persona, 486 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id":"p1","name":"默认人设","content":"你是安安欣欣的捷宝宝，安安...
+--------------------------------------------------
+INFO:     163.181.32.172:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262028655 HTTP/1.0" 200 OK
+===== [收到jabobo_ids请求] =====
+接收的x_username: Alice
+接收的Authorization（前10位）: c8e9c000-d...
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Alice
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Alice)
+📊 查询到的行数：1
+📋 [LIST] User: Alice | Devices: ['80:b5:4e:e1:7c:30']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e1:7c:30']
+INFO:     163.181.32.163:0 - "GET /api/user/jabobo_ids?_t=1769262147981 HTTP/1.0" 200 OK
+===== [收到jabobo_ids请求] =====
+接收的x_username: Alice
+接收的Authorization（前10位）: c8e9c000-d...
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Alice
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Alice)
+📊 查询到的行数：1
+📋 [LIST] User: Alice | Devices: ['80:b5:4e:e1:7c:30']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e1:7c:30']
+INFO:     163.181.32.150:0 - "GET /api/user/jabobo_ids?_t=1769262655690 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:01
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:01
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 21:51:01
+   👤 User: Alice
+   🆔 Target Device: 80:b5:4e:e1:7c:30
+   📦 Data Found: 156 chars of persona, 486 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id":"p1","name":"默认人设","content":"你是安安欣欣的捷宝宝，安安...
+--------------------------------------------------
+INFO:     163.181.32.181:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262659256 HTTP/1.0" 200 OK
+
+===== 开始处理音频文件查询请求 ===== | 时间：2026-01-24 21:51:28
+[请求信息] 用户名：Alice | 设备ID：80:b5:4e:e1:7c:30
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库操作] 开始查询音频文件列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:28
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:28
+[数据库操作] 执行查询SQL：SELECT audio_status FROM user_personas WHERE jabobo_id = %s | 参数：(80:b5:4e:e1:7c:30)
+[数据库操作] 查询结果：{'audio_status': '[{"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav", "file_size_bytes": 63404, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "你考一考我吧。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:03:36", "upload_timestamp": 1768831416, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav", "file_size_bytes": 65324, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "一共有5个。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:03:51", "upload_timestamp": 1768831431, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav", "file_size_bytes": 103724, "file_size_mb": 0.1, "audio_format": "wav", "audio_content": "请你把音量调到30%。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:04:08", "upload_timestamp": 1768831448, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav", "file_size_bytes": 73004, "file_size_mb": 0.07, "audio_format": "wav", "audio_content": "你给我出一道一。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:06:14", "upload_timestamp": 1768831574, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav", "file_size_bytes": 80684, "file_size_mb": 0.08, "audio_format": "wav", "audio_content": "给我出一个数学题。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:06:42", "upload_timestamp": 1768831602, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav", "file_size_bytes": 67244, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "还剩三个呢。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:06:57", "upload_timestamp": 1768831617, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav", "file_size_bytes": 76844, "file_size_mb": 0.07, "audio_format": "wav", "audio_content": "介绍一下你自己。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:07:37", "upload_timestamp": 1768831657, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav", "file_size_bytes": 59564, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "给我出一道题。", "speaker": "未知说话人", "upload_time": "2026-01-19 22:08:02", "upload_timestamp": 1768831682, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav", "file_size_bytes": 49964, "file_size_mb": 0.05, "audio_format": "wav", "audio_content": "只吗？", "speaker": "未知说话人", "upload_time": "2026-01-19 22:08:25", "upload_timestamp": 1768831705, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav", "file_name": "audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav", "file_size_bytes": 49964, "file_size_mb": 0.05, "audio_format": "wav", "audio_content": "5只啊是不是5？", "speaker": "未知说话人", "upload_time": "2026-01-19 22:08:39", "upload_timestamp": 1768831719, "sessionId": "80:b5:4e:e1:7c:30", "chatType": 1}]'}
+[数据解析] 解析音频JSON成功 - 列表长度：10
+[数据处理] 处理第 1 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav', 'file_size_bytes': 63404, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '你考一考我吧。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:03:36', 'upload_timestamp': 1768831416, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220336_你考一考我吧。.wav
+[文件检查] 存在 - 音频文件大小：63404 字节
+[数据处理] 处理第 2 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav', 'file_size_bytes': 65324, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '一共有5个。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:03:51', 'upload_timestamp': 1768831431, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220351_一共有5个。.wav
+[文件检查] 存在 - 音频文件大小：65324 字节
+[数据处理] 处理第 3 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav', 'file_size_bytes': 103724, 'file_size_mb': 0.1, 'audio_format': 'wav', 'audio_content': '请你把音量调到30%。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:04:08', 'upload_timestamp': 1768831448, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220408_请你把音量调到30%.wav
+[文件检查] 存在 - 音频文件大小：103724 字节
+[数据处理] 处理第 4 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav', 'file_size_bytes': 73004, 'file_size_mb': 0.07, 'audio_format': 'wav', 'audio_content': '你给我出一道一。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:06:14', 'upload_timestamp': 1768831574, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220614_你给我出一道一。.wav
+[文件检查] 存在 - 音频文件大小：73004 字节
+[数据处理] 处理第 5 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav', 'file_size_bytes': 80684, 'file_size_mb': 0.08, 'audio_format': 'wav', 'audio_content': '给我出一个数学题。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:06:42', 'upload_timestamp': 1768831602, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220642_给我出一个数学题。.wav
+[文件检查] 存在 - 音频文件大小：80684 字节
+[数据处理] 处理第 6 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav', 'file_size_bytes': 67244, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '还剩三个呢。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:06:57', 'upload_timestamp': 1768831617, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220657_还剩三个呢。.wav
+[文件检查] 不存在
+[数据处理] 处理第 7 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav', 'file_size_bytes': 76844, 'file_size_mb': 0.07, 'audio_format': 'wav', 'audio_content': '介绍一下你自己。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:07:37', 'upload_timestamp': 1768831657, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220737_介绍一下你自己。.wav
+[文件检查] 存在 - 音频文件大小：76844 字节
+[数据处理] 处理第 8 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav', 'file_size_bytes': 59564, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '给我出一道题。', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:08:02', 'upload_timestamp': 1768831682, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220802_给我出一道题。.wav
+[文件检查] 存在 - 音频文件大小：59564 字节
+[数据处理] 处理第 9 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav', 'file_size_bytes': 49964, 'file_size_mb': 0.05, 'audio_format': 'wav', 'audio_content': '只吗？', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:08:25', 'upload_timestamp': 1768831705, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220825_只吗？.wav
+[文件检查] 存在 - 音频文件大小：49964 字节
+[数据处理] 处理第 10 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav', 'file_name': 'audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav', 'file_size_bytes': 49964, 'file_size_mb': 0.05, 'audio_format': 'wav', 'audio_content': '5只啊是不是5？', 'speaker': '未知说话人', 'upload_time': '2026-01-19 22:08:39', 'upload_timestamp': 1768831719, 'sessionId': '80:b5:4e:e1:7c:30', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_220839_5只啊是不是5？.wav
+[文件检查] 存在 - 音频文件大小：49964 字节
+
+[查询完成] 成功 - 共查询到 10 条音频记录 | 时间：2026-01-24 21:51:28
+===== 音频查询请求处理完成 ===== | 时间：2026-01-24 21:51:28
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 21:51:28
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.184:0 - "GET /api/user/list-audio?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262686356 HTTP/1.0" 200 OK
+
+===== 开始处理声纹列表查询请求 ===== | 时间：2026-01-24 21:51:29
+[请求信息] 用户名：Alice | 设备ID：80:b5:4e:e1:7c:30
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:29
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:29
+[数据库操作] 执行查询SQL：SELECT voiceprint_list FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Alice, 80:b5:4e:e1:7c:30)
+[数据解析] 解析JSON成功 - 列表长度：1
+[数据处理] 处理第 1 条声纹记录：{'voiceprint_name': '欣欣', 'speaker_id': '80:b5:4e:e1:7c:30_欣欣', 'file_path': '/var/local/jobobo-backend/data/Alice/80:b5:4e:e1:7c:30/audio_files/audio_80:b5:4e:e1:7c:30_20260119_204434_是叫星星，我现在5岁.wav', 'file_size_bytes': 105644, 'file_size_mb': 0.1, 'create_time': '2026-01-19 20:47:12', 'create_timestamp': 1768826832.881129}
+
+[查询完成] 成功 - 共查询到 1 条声纹记录 | 时间：2026-01-24 21:51:29
+===== 声纹列表查询请求处理完成 ===== | 时间：2026-01-24 21:51:29
+
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.170:0 - "GET /api/voiceprint/list?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262687563 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:34
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:34
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 21:51:34
+   👤 User: Alice
+   🆔 Target Device: 80:b5:4e:e1:7c:30
+   📦 Data Found: 156 chars of persona, 486 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id":"p1","name":"默认人设","content":"你是安安欣欣的捷宝宝，安安...
+--------------------------------------------------
+INFO:     163.181.32.181:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262692233 HTTP/1.0" 200 OK
+
+===== 开始处理知识库查询请求 ===== | 时间：2026-01-24 21:51:36
+[请求信息] 用户名：Alice | 设备ID：80:b5:4e:e1:7c:30
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库操作] 开始查询知识库列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:36
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:36
+[数据库操作] 执行查询SQL：SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Alice, 80:b5:4e:e1:7c:30)
+[数据库操作] 查询结果：{'kb_status': None}
+[数据处理] 无知识库记录
+
+[查询完成] 成功 - 共查询到 0 条记录 | 时间：2026-01-24 21:51:36
+===== 查询请求处理完成 ===== | 时间：2026-01-24 21:51:36
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 21:51:36
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.158:0 - "GET /api/user/list-kb?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262694308 HTTP/1.0" 200 OK
+
+===== 开始处理知识库查询请求 ===== | 时间：2026-01-24 21:51:37
+[请求信息] 用户名：Alice | 设备ID：80:b5:4e:e1:7c:30
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库操作] 开始查询知识库列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:37
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:37
+[数据库操作] 执行查询SQL：SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Alice, 80:b5:4e:e1:7c:30)
+[数据库操作] 查询结果：{'kb_status': None}
+[数据处理] 无知识库记录
+
+[查询完成] 成功 - 共查询到 0 条记录 | 时间：2026-01-24 21:51:37
+===== 查询请求处理完成 ===== | 时间：2026-01-24 21:51:37
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 21:51:37
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.176:0 - "GET /api/user/list-kb?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262694343 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Alice
+接收的Authorization原始值: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+清洗后的token: c8e9c000-dc7d-4424-8e23-9d1a23b42037
+数据库查询结果: {'username': 'Alice', 'web_token': '03f200cd-d79b-4aee-b83e-be6e5125d94a', 'android_token': 'c8e9c000-dc7d-4424-8e23-9d1a23b42037', 'ios_token': None}
+比对web_token: 数据库值=03f200cd-d79b-4aee-b83e-be6e5125d94a | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+比对android_token: 数据库值=c8e9c000-dc7d-4424-8e23-9d1a23b42037 | 请求值=c8e9c000-dc7d-4424-8e23-9d1a23b42037
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 21:51:42
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 21:51:42
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 21:51:42
+   👤 User: Alice
+   🆔 Target Device: 80:b5:4e:e1:7c:30
+   📦 Data Found: 156 chars of persona, 486 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id":"p1","name":"默认人设","content":"你是安安欣欣的捷宝宝，安安...
+--------------------------------------------------
+INFO:     163.181.32.178:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae1%3A7c%3A30&_t=1769262700355 HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 21:55:37 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:15 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:22 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:25 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:27 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:30 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:32 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:32 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:58:35 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:59:13 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:59:33 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:59:37 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:59:43 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 21:59:49 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:00 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:03 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download?miuiStable=1&client_version_code=201010300&client_version_name=20.10.1030106&isAdvertisingEnabled=true HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:05 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download?miuiStable=1&client_version_code=201010300&client_version_name=20.10.1030106&isAdvertisingEnabled=true HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:07 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:09 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:10 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download?miuiStable=1&client_version_code=201010300&client_version_name=20.10.1030106&isAdvertisingEnabled=true HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:12 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:13 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:15 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:20 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:20 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:25 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:28 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:32 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:34 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:35 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:38 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:44 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:45 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:45 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:47 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:48 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:48 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:49 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:50 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:50 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:51 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:51 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:52 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:54 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:56 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:56 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:57 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:57 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:57 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:58 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:59 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:59 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:00:59 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:00 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:00 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:01 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:01 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:01 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:02 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:02 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:02 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:02 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:02 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:03 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:03 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:03 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:03 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:03 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:04 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:05 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:05 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:06 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:06 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:06 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:06 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:07 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:07 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:07 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:08 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:08 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:09 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:09 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:09 - Serving: jabobo.apk
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:09 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:10 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:10 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:10 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:10 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:11 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:12 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:12 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:12 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:12 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:12 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:13 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:14 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:14 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:14 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:15 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:16 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:16 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:16 - Serving: jabobo.apk
+INFO:     163.181.32.168:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:17 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:17 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:17 - Serving: jabobo.apk
+INFO:     163.181.32.168:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:18 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:18 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:19 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:19 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:19 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:20 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:21 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:21 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:22 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:22 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:23 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:23 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:23 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:23 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:24 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:24 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:24 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:25 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:26 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:27 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:27 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:27 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:28 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:29 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:30 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:30 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:30 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:30 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:31 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:32 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:33 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:33 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:33 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:34 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:34 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:35 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:36 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:36 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:37 - Serving: jabobo.apk
+INFO:     163.181.32.184:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:37 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:37 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:37 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:39 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:39 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:40 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:40 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:41 - Serving: jabobo.apk
+INFO:     163.181.32.180:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:42 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:43 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:43 - Serving: jabobo.apk
+INFO:     163.181.32.163:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+
+==================================================
+📲 登录请求接收开始
+==================================================
+请求体原始数据：{'username': 'shen', 'password': '123456', 'client_type': <ClientType.ANDROID: 'android'>}
+用户名：shen
+密码（密文校验前）：123456****
+前端传的client_type：ClientType.ANDROID
+client_type类型：<enum 'ClientType'>
+
+🔌 数据库连接校验
+数据库连接结果：True
+
+👤 查询用户信息
+用户查询结果：{'id': 24, 'username': 'Shen', 'password': '$2b$12$sCYvocWM2WdkvM3JhYJMceJ2.M0YhMkRI6V5CYCtqcaDEJO15ggD6', 'role': 'User', 'session_token': None, 'token_expires': None, 'create_time': datetime.datetime(2026, 1, 12, 7, 0, 31), 'client_type': 'web', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': None, 'ios_token': None}
+
+🔐 密码校验
+🔍 正在校验密码...
+   - 输入的明文: 123456
+   - 数据库中的值: $2b$12$sCYvocWM2WdkvM3JhYJMceJ2.M0YhMkRI6V5CYCtqcaDEJO15ggD6
+✅ 密码校验通过！
+密码校验结果：True
+
+📱 客户端类型处理
+原始client_type：ClientType.ANDROID
+转小写后client_type：android
+匹配的token字段：android_token（映射表：{'web': 'web_token', 'android': 'android_token', 'ios': 'ios_token'}）
+
+🔑 生成专属token
+生成的token：2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+
+🗄️ 数据库更新操作
+更新SQL：UPDATE user_login SET android_token = %s WHERE username = %s
+SQL参数：token=2ad52d0c-a4ea-451d-8619-c2b02b2915ed, username=Shen
+SQL执行影响行数：1
+
+✅ 提交数据库事务
+事务提交成功
+
+🔍 验证数据库更新结果
+更新后用户token信息：{'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+
+📤 登录成功，返回结果
+
+🔌 关闭数据库连接
+==================================================
+📲 登录请求处理结束
+==================================================
+
+INFO:     163.181.32.182:0 - "POST /api/login HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:44 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:44 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:46 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:46 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:46 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+===== [收到jabobo_ids请求] =====
+接收的x_username: Shen
+接收的Authorization（前10位）: 2ad52d0c-a...
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Shen
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Shen)
+📊 查询到的行数：1
+📋 [LIST] User: Shen | Devices: ['80:b5:4e:e0:98:8c']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e0:98:8c']
+INFO:     163.181.32.167:0 - "GET /api/user/jabobo_ids?_t=1769263303949 HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:47 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:47 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:49 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:49 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:49 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:50 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:50 - Serving: jabobo.apk
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:50 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:01:51
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:01:51
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:01:51
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.158:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263309722 HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:51 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:52 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:52 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:52 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:53 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:53 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:54 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:56 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:56 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:56 - Serving: jabobo.apk
+INFO:     163.181.32.173:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:57 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:57 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+===== [收到jabobo_ids请求] =====
+接收的x_username: Shen
+接收的Authorization（前10位）: 2ad52d0c-a...
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Shen
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Shen)
+📊 查询到的行数：1
+📋 [LIST] User: Shen | Devices: ['80:b5:4e:e0:98:8c']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e0:98:8c']
+INFO:     163.181.32.166:0 - "GET /api/user/jabobo_ids?_t=1769263316538 HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:58 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:01:59 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:00 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:01 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:02 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:02 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:04 - Serving: jabobo.apk
+INFO:     163.181.32.154:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:05 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:07 - Serving: jabobo.apk
+INFO:     163.181.32.181:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:10 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:11 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:12 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:02:13 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:02:29
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:02:29
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:02:29
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.172:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263348388 HTTP/1.0" 200 OK
+
+===== 开始处理知识库查询请求 ===== | 时间：2026-01-24 22:02:40
+[请求信息] 用户名：Shen | 设备ID：80:b5:4e:e0:98:8c
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库操作] 开始查询知识库列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:02:40
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:02:40
+[数据库操作] 执行查询SQL：SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Shen, 80:b5:4e:e0:98:8c)
+[数据库操作] 查询结果：{'kb_status': None}
+[数据处理] 无知识库记录
+
+[查询完成] 成功 - 共查询到 0 条记录 | 时间：2026-01-24 22:02:40
+===== 查询请求处理完成 ===== | 时间：2026-01-24 22:02:40
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 22:02:40
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.149:0 - "GET /api/user/list-kb?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263359453 HTTP/1.0" 200 OK
+
+===== 开始处理知识库查询请求 ===== | 时间：2026-01-24 22:02:42
+[请求信息] 用户名：Shen | 设备ID：80:b5:4e:e0:98:8c
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库操作] 开始查询知识库列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:02:42
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:02:42
+[数据库操作] 执行查询SQL：SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Shen, 80:b5:4e:e0:98:8c)
+[数据库操作] 查询结果：{'kb_status': None}
+[数据处理] 无知识库记录
+
+[查询完成] 成功 - 共查询到 0 条记录 | 时间：2026-01-24 22:02:42
+===== 查询请求处理完成 ===== | 时间：2026-01-24 22:02:42
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 22:02:42
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.157:0 - "GET /api/user/list-kb?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263359522 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:02:53
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:02:53
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:02:53
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.169:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263371987 HTTP/1.0" 200 OK
+
+===== 开始处理知识库查询请求 ===== | 时间：2026-01-24 22:03:45
+[请求信息] 用户名：Shen | 设备ID：80:b5:4e:e0:98:8c
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库操作] 开始查询知识库列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:03:45
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:03:45
+[数据库操作] 执行查询SQL：SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Shen, 80:b5:4e:e0:98:8c)
+[数据库操作] 查询结果：{'kb_status': None}
+[数据处理] 无知识库记录
+
+[查询完成] 成功 - 共查询到 0 条记录 | 时间：2026-01-24 22:03:45
+===== 查询请求处理完成 ===== | 时间：2026-01-24 22:03:45
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 22:03:45
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.172:0 - "GET /api/user/list-kb?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263423766 HTTP/1.0" 200 OK
+
+===== 开始处理知识库查询请求 ===== | 时间：2026-01-24 22:03:49
+[请求信息] 用户名：Shen | 设备ID：80:b5:4e:e0:98:8c
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库操作] 开始查询知识库列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:03:49
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:03:49
+[数据库操作] 执行查询SQL：SELECT kb_status FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Shen, 80:b5:4e:e0:98:8c)
+[数据库操作] 查询结果：{'kb_status': None}
+[数据处理] 无知识库记录
+
+[查询完成] 成功 - 共查询到 0 条记录 | 时间：2026-01-24 22:03:49
+===== 查询请求处理完成 ===== | 时间：2026-01-24 22:03:49
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 22:03:49
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.175:0 - "GET /api/user/list-kb?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263423798 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:04:04
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:04:04
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:04:04
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.164:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263443228 HTTP/1.0" 200 OK
+
+===== 开始处理音频文件查询请求 ===== | 时间：2026-01-24 22:04:56
+[请求信息] 用户名：Shen | 设备ID：80:b5:4e:e0:98:8c
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库操作] 开始查询音频文件列表
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:04:56
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:04:56
+[数据库操作] 执行查询SQL：SELECT audio_status FROM user_personas WHERE jabobo_id = %s | 参数：(80:b5:4e:e0:98:8c)
+[数据库操作] 查询结果：{'audio_status': '[{"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172747_然后呢。.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_172747_然后呢。.wav", "file_size_bytes": 63404, "file_size_mb": 0.06, "audio_format": "wav", "audio_content": "然后呢。", "speaker": "未知说话人", "upload_time": "2026-01-24 17:27:47", "upload_timestamp": 1769246867, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172803_我觉得他不如小智AI.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_172803_我觉得他不如小智AI.wav", "file_size_bytes": 105644, "file_size_mb": 0.1, "audio_format": "wav", "audio_content": "我觉得他不如小智AI怎么关？", "speaker": "未知说话人", "upload_time": "2026-01-24 17:28:03", "upload_timestamp": 1769246883, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172936_你给我唱首歌吧。.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_172936_你给我唱首歌吧。.wav", "file_size_bytes": 111404, "file_size_mb": 0.11, "audio_format": "wav", "audio_content": "你给我唱首歌吧。", "speaker": "未知说话人", "upload_time": "2026-01-24 17:29:36", "upload_timestamp": 1769246976, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173012_我想跟你讲英。😊.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173012_我想跟你讲英。😊.wav", "file_size_bytes": 73004, "file_size_mb": 0.07, "audio_format": "wav", "audio_content": "我想跟你讲英。😊", "speaker": "未知说话人", "upload_time": "2026-01-24 17:30:12", "upload_timestamp": 1769247012, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173027_你不想听啥。😡.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173027_你不想听啥。😡.wav", "file_size_bytes": 55724, "file_size_mb": 0.05, "audio_format": "wav", "audio_content": "你不想听啥。😡", "speaker": "未知说话人", "upload_time": "2026-01-24 17:30:27", "upload_timestamp": 1769247027, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173036_我觉得。.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173036_我觉得。.wav", "file_size_bytes": 155564, "file_size_mb": 0.15, "audio_format": "wav", "audio_content": "我觉得。", "speaker": "未知说话人", "upload_time": "2026-01-24 17:30:36", "upload_timestamp": 1769247036, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173051_你跟我讲英语。.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173051_你跟我讲英语。.wav", "file_size_bytes": 74924, "file_size_mb": 0.07, "audio_format": "wav", "audio_content": "你跟我讲英语。", "speaker": "未知说话人", "upload_time": "2026-01-24 17:30:51", "upload_timestamp": 1769247051, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173106_你有看过Harry .wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173106_你有看过Harry .wav", "file_size_bytes": 145964, "file_size_mb": 0.14, "audio_format": "wav", "audio_content": "你有看过Harry Potter吗？", "speaker": "未知说话人", "upload_time": "2026-01-24 17:31:06", "upload_timestamp": 1769247066, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173125_我最喜欢lu娜。.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173125_我最喜欢lu娜。.wav", "file_size_bytes": 82604, "file_size_mb": 0.08, "audio_format": "wav", "audio_content": "我最喜欢lu娜。", "speaker": "未知说话人", "upload_time": "2026-01-24 17:31:25", "upload_timestamp": 1769247085, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}, {"file_path": "/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173143_不过智能体。.wav", "file_name": "audio_80:b5:4e:e0:98:8c_20260124_173143_不过智能体。.wav", "file_size_bytes": 51884, "file_size_mb": 0.05, "audio_format": "wav", "audio_content": "不过智能体。", "speaker": "未知说话人", "upload_time": "2026-01-24 17:31:43", "upload_timestamp": 1769247103, "sessionId": "80:b5:4e:e0:98:8c", "chatType": 1}]'}
+[数据解析] 解析音频JSON成功 - 列表长度：10
+[数据处理] 处理第 1 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172747_然后呢。.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_172747_然后呢。.wav', 'file_size_bytes': 63404, 'file_size_mb': 0.06, 'audio_format': 'wav', 'audio_content': '然后呢。', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:27:47', 'upload_timestamp': 1769246867, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172747_然后呢。.wav
+[文件检查] 存在 - 音频文件大小：63404 字节
+[数据处理] 处理第 2 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172803_我觉得他不如小智AI.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_172803_我觉得他不如小智AI.wav', 'file_size_bytes': 105644, 'file_size_mb': 0.1, 'audio_format': 'wav', 'audio_content': '我觉得他不如小智AI怎么关？', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:28:03', 'upload_timestamp': 1769246883, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172803_我觉得他不如小智AI.wav
+[文件检查] 存在 - 音频文件大小：105644 字节
+[数据处理] 处理第 3 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172936_你给我唱首歌吧。.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_172936_你给我唱首歌吧。.wav', 'file_size_bytes': 111404, 'file_size_mb': 0.11, 'audio_format': 'wav', 'audio_content': '你给我唱首歌吧。', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:29:36', 'upload_timestamp': 1769246976, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_172936_你给我唱首歌吧。.wav
+[文件检查] 存在 - 音频文件大小：111404 字节
+[数据处理] 处理第 4 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173012_我想跟你讲英。😊.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173012_我想跟你讲英。😊.wav', 'file_size_bytes': 73004, 'file_size_mb': 0.07, 'audio_format': 'wav', 'audio_content': '我想跟你讲英。😊', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:30:12', 'upload_timestamp': 1769247012, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173012_我想跟你讲英。😊.wav
+[文件检查] 存在 - 音频文件大小：73004 字节
+[数据处理] 处理第 5 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173027_你不想听啥。😡.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173027_你不想听啥。😡.wav', 'file_size_bytes': 55724, 'file_size_mb': 0.05, 'audio_format': 'wav', 'audio_content': '你不想听啥。😡', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:30:27', 'upload_timestamp': 1769247027, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173027_你不想听啥。😡.wav
+[文件检查] 存在 - 音频文件大小：55724 字节
+[数据处理] 处理第 6 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173036_我觉得。.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173036_我觉得。.wav', 'file_size_bytes': 155564, 'file_size_mb': 0.15, 'audio_format': 'wav', 'audio_content': '我觉得。', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:30:36', 'upload_timestamp': 1769247036, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173036_我觉得。.wav
+[文件检查] 存在 - 音频文件大小：155564 字节
+[数据处理] 处理第 7 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173051_你跟我讲英语。.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173051_你跟我讲英语。.wav', 'file_size_bytes': 74924, 'file_size_mb': 0.07, 'audio_format': 'wav', 'audio_content': '你跟我讲英语。', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:30:51', 'upload_timestamp': 1769247051, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173051_你跟我讲英语。.wav
+[文件检查] 存在 - 音频文件大小：74924 字节
+[数据处理] 处理第 8 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173106_你有看过Harry .wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173106_你有看过Harry .wav', 'file_size_bytes': 145964, 'file_size_mb': 0.14, 'audio_format': 'wav', 'audio_content': '你有看过Harry Potter吗？', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:31:06', 'upload_timestamp': 1769247066, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173106_你有看过Harry .wav
+[文件检查] 存在 - 音频文件大小：145964 字节
+[数据处理] 处理第 9 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173125_我最喜欢lu娜。.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173125_我最喜欢lu娜。.wav', 'file_size_bytes': 82604, 'file_size_mb': 0.08, 'audio_format': 'wav', 'audio_content': '我最喜欢lu娜。', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:31:25', 'upload_timestamp': 1769247085, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173125_我最喜欢lu娜。.wav
+[文件检查] 存在 - 音频文件大小：82604 字节
+[数据处理] 处理第 10 条音频记录：{'file_path': '/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173143_不过智能体。.wav', 'file_name': 'audio_80:b5:4e:e0:98:8c_20260124_173143_不过智能体。.wav', 'file_size_bytes': 51884, 'file_size_mb': 0.05, 'audio_format': 'wav', 'audio_content': '不过智能体。', 'speaker': '未知说话人', 'upload_time': '2026-01-24 17:31:43', 'upload_timestamp': 1769247103, 'sessionId': '80:b5:4e:e0:98:8c', 'chatType': 1}
+[文件检查] 检查音频文件是否存在：/var/local/jobobo-backend/data/Shen/80:b5:4e:e0:98:8c/audio_files/audio_80:b5:4e:e0:98:8c_20260124_173143_不过智能体。.wav
+[文件检查] 存在 - 音频文件大小：51884 字节
+
+[查询完成] 成功 - 共查询到 10 条音频记录 | 时间：2026-01-24 22:04:56
+===== 音频查询请求处理完成 ===== | 时间：2026-01-24 22:04:56
+
+
+[资源释放] 关闭数据库连接 - 时间：2026-01-24 22:04:56
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.166:0 - "GET /api/user/list-audio?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263495034 HTTP/1.0" 200 OK
+
+===== 开始处理声纹列表查询请求 ===== | 时间：2026-01-24 22:04:58
+[请求信息] 用户名：Shen | 设备ID：80:b5:4e:e0:98:8c
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:04:58
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:04:58
+[数据库操作] 执行查询SQL：SELECT voiceprint_list FROM user_personas WHERE username = %s AND jabobo_id = %s | 参数：(Shen, 80:b5:4e:e0:98:8c)
+
+[查询完成] 成功 - 共查询到 0 条声纹记录 | 时间：2026-01-24 22:04:58
+===== 声纹列表查询请求处理完成 ===== | 时间：2026-01-24 22:04:58
+
+[资源释放] 数据库连接已关闭
+
+INFO:     163.181.32.181:0 - "GET /api/voiceprint/list?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263496567 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:05:05
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:05:05
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:05:05
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.180:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263504386 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:05:09
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:05:09
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:05:09
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.157:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263508185 HTTP/1.0" 200 OK
+===== [收到jabobo_ids请求] =====
+接收的x_username: Shen
+接收的Authorization（前10位）: 2ad52d0c-a...
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+✅ 身份验证通过：用户名=Shen
+🔍 执行SQL：SELECT jabobo_id FROM user_personas WHERE username = %s | 参数：(Shen)
+📊 查询到的行数：1
+📋 [LIST] User: Shen | Devices: ['80:b5:4e:e0:98:8c']
+📤 返回结果：success=True, jabobo_ids=['80:b5:4e:e0:98:8c']
+INFO:     163.181.32.177:0 - "GET /api/user/jabobo_ids?_t=1769263540603 HTTP/1.0" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:06:01 - Serving: jabobo.apk
+INFO:     163.181.32.182:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:06:05
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:06:05
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:06:05
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.177:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263563910 HTTP/1.0" 200 OK
+
+===== [身份验证日志] =====
+接收的x-username: Shen
+接收的Authorization原始值: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+清洗后的token: 2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+数据库查询结果: {'username': 'Shen', 'web_token': 'cacb5d3c-776b-45c9-99a4-ee0a58e430ed', 'android_token': '2ad52d0c-a4ea-451d-8619-c2b02b2915ed', 'ios_token': None}
+比对web_token: 数据库值=cacb5d3c-776b-45c9-99a4-ee0a58e430ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+比对android_token: 数据库值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed | 请求值=2ad52d0c-a4ea-451d-8619-c2b02b2915ed
+✅ 身份验证通过
+
+[数据库游标检查] 开始检查游标状态 - 时间：2026-01-24 22:06:18
+[数据库游标检查] 游标当前状态：正常
+[数据库游标检查] 游标检查完成 - 时间：2026-01-24 22:06:18
+--------------------------------------------------
+🔍 [GET CONFIG] 2026-01-24 22:06:18
+   👤 User: Shen
+   🆔 Target Device: 80:b5:4e:e0:98:8c
+   📦 Data Found: 93 chars of persona, 553 chars of memory
+   📌 Version: Current=1.0.0 | Expected=1.0.0
+   📄 Persona Type: <class 'str'> | Preview: [{"id": "p1", "name": "\u9ed8\u8ba4\u4eba\u8bbe", ...
+--------------------------------------------------
+INFO:     163.181.32.178:0 - "GET /api/user/config?jabobo_id=80%3Ab5%3A4e%3Ae0%3A98%3A8c&_t=1769263576959 HTTP/1.0" 200 OK
+OTA request received - Device-Id: 80:b5:4e:e0:98:8c, Client-Id: 15707943-3998-4a2d-97fb-143d7811719c
+User-Agent: bread-compact-wifi-lcd-tianhao/2.0.3, Activation-Version: 1
+Device Info: {
+  "version": 2,
+  "language": "zh-CN",
+  "flash_size": 16777216,
+  "minimum_free_heap_size": "6493376",
+  "mac_address": "80:b5:4e:e0:98:8c",
+  "uuid": "15707943-3998-4a2d-97fb-143d7811719c",
+  "chip_model_name": "esp32s3",
+  "chip_info": {
+    "model": 9,
+    "cores": 2,
+    "revision": 2,
+    "features": 18
+  },
+  "application": {
+    "name": "Jabob",
+    "version": "2.0.3",
+    "compile_time": "Jan 14 2026T07:58:33Z",
+    "idf_version": "v5.4.2",
+    "elf_sha256": "a5f06d1b7733044752f32be068ceae3e31700c5a71d463b4be7c633ddd3b2479"
+  },
+  "partition_table": [
+    {
+      "label": "nvs",
+      "type": 1,
+      "subtype": 2,
+      "address": 36864,
+      "size": 16384
+    },
+    {
+      "label": "otadata",
+      "type": 1,
+      "subtype": 0,
+      "address": 53248,
+      "size": 8192
+    },
+    {
+      "label": "phy_init",
+      "type": 1,
+      "subtype": 1,
+      "address": 61440,
+      "size": 4096
+    },
+    {
+      "label": "model",
+      "type": 1,
+      "subtype": 130,
+      "address": 65536,
+      "size": 4128768
+    },
+    {
+      "label": "ota_0",
+      "type": 0,
+      "subtype": 16,
+      "address": 4194304,
+      "size": 6291456
+    },
+    {
+      "label": "ota_1",
+      "type": 0,
+      "subtype": 17,
+      "address": 10485760,
+      "size": 6291456
+    }
+  ],
+  "ota": {
+    "label": "ota_1"
+  },
+  "board": {
+    "type": "bread-compact-wifi-lcd-tianhao",
+    "name": "bread-compact-wifi-lcd-tianhao",
+    "ssid": "TP-LINK_D31E",
+    "rssi": -57,
+    "channel": 1,
+    "ip": "192.168.0.67",
+    "mac": "80:b5:4e:e0:98:8c"
+  }
+}
+🔍 [OTA CHECK] Checking if device 80:b5:4e:e0:98:8c is already registered...
+✅ [OTA CHECK] Device 80:b5:4e:e0:98:8c is already registered to user: Shen
+🔓 [OTA ACTIVATION] No activation needed for registered device 80:b5:4e:e0:98:8c
+INFO:     223.73.55.45:27535 - "POST /api/user/device/ota HTTP/1.1" 200 OK
+🚀 [APP DOWNLOAD] 2026-01-24 22:12:44 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:21 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:26 - Serving: jabobo.apk
+INFO:     163.181.32.179:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:29 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:33 - Serving: jabobo.apk
+INFO:     163.181.32.168:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:35 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:40 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:49 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:53 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:56 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:14:58 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:01 - Serving: jabobo.apk
+INFO:     163.181.32.176:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:04 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:08 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:11 - Serving: jabobo.apk
+INFO:     163.181.32.169:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:14 - Serving: jabobo.apk
+INFO:     163.181.32.157:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:18 - Serving: jabobo.apk
+INFO:     163.181.32.177:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:22 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:25 - Serving: jabobo.apk
+INFO:     163.181.32.178:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:30 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:40 - Serving: jabobo.apk
+INFO:     163.181.32.156:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:43 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:15:44 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:12 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:16 - Serving: jabobo.apk
+INFO:     163.181.32.175:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:19 - Serving: jabobo.apk
+INFO:     163.181.32.152:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:22 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:25 - Serving: jabobo.apk
+INFO:     163.181.32.164:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:29 - Serving: jabobo.apk
+INFO:     163.181.32.158:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:32 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:35 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:38 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:41 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:43 - Serving: jabobo.apk
+INFO:     163.181.32.172:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:48 - Serving: jabobo.apk
+INFO:     163.181.32.149:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:53 - Serving: jabobo.apk
+INFO:     163.181.32.167:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:18:57 - Serving: jabobo.apk
+INFO:     163.181.32.160:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:19:00 - Serving: jabobo.apk
+INFO:     163.181.32.162:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:19:02 - Serving: jabobo.apk
+INFO:     163.181.32.166:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:19:05 - Serving: jabobo.apk
+INFO:     163.181.32.161:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:19:08 - Serving: jabobo.apk
+INFO:     163.181.32.150:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:19:11 - Serving: jabobo.apk
+INFO:     163.181.32.170:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
+🚀 [APP DOWNLOAD] 2026-01-24 22:19:16 - Serving: jabobo.apk
+INFO:     163.181.32.151:0 - "GET /api/app/download HTTP/1.0" 206 Partial Content
