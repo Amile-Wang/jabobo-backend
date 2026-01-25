@@ -274,8 +274,20 @@ async def handle_ota_request(
 
     # 构造响应，按照设备期望的格式
     # 生成带版本的固件文件名，例如 Jabobo_2.0.3.bin
+    # 首先将 firmware_version 清理为 safe_ver，然后确认 OTA 目录中确实存在该版本文件；
+    # 如果不存在则回退到设备上报的 app_version（仍会尝试查找对应文件，若找不到下载路由会回退到通用 Jabob.bin）
+    ota_dir = "/var/local/jobobo-backend/OTA"
     safe_ver = str(firmware_version).replace(' ', '_')
-    download_filename = f"Jabobo_{safe_ver}.bin"
+    versioned_filename = f"Jabobo_{safe_ver}.bin"
+    # 如果版本化文件在 OTA 目录中不存在，则回退到 app_version
+    if not os.path.exists(os.path.join(ota_dir, versioned_filename)):
+        safe_ver = str(app_version).replace(' ', '_')
+        # versioned_filename = f"Jabobo_{safe_ver}.bin"
+        versioned_filename = f"Jabobo.bin"
+        # 如果回退后的 app_version 文件仍不存在，则保持使用回退后的 safe_ver，
+        # 下载路由会在找不到该文件时回退到通用 Jabob.bin，确保向后兼容
+
+    download_filename = versioned_filename
     download_url = f"http://121.41.168.85:8007/api/xiaozhi/otaMag/download/{download_filename}"
 
     response_data = {
@@ -285,7 +297,7 @@ async def handle_ota_request(
             "timezone_offset": 480  # 时区偏移分钟数（GMT+8 = 480分钟）
         },
         "firmware": {
-            "version": firmware_version,
+            "version": safe_ver,
             "url": download_url,
             "force": 0
         },
