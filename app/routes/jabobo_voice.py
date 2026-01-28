@@ -589,7 +589,7 @@ async def list_audio_files(
         logger.debug(f"[资源释放] 数据库连接已关闭\n")
 
 # --- 删除音频接口（仍保留用户验证，若需调整可说明）---
-@router.delete("/user/delete-audio")
+@router.post("/user/delete-audio")
 async def delete_audio_file(
     jabobo_id: str = Query(..., description="设备ID"),
     file_path: str = Query(..., description="要删除的音频文件绝对路径"),

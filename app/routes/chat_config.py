@@ -79,7 +79,7 @@ async def get_server_base_config():
                 "VAD_SileroVAD": {
                     "type": "silero",
                     "model_dir": "models/snakers4_silero-vad",
-                    "threshold": "0.85",
+                    "threshold": "0.65",
                     "min_silence_duration_ms": "500"
                 }
             },
