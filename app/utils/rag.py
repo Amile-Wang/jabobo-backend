@@ -17,18 +17,18 @@ from loguru import logger
 # ========== 加载 .env 配置文件 ==========
 load_dotenv(override=True)
 
-# ============== 从 .env 读取固定配置（无默认值） ==============
-ARK_API_KEY = os.getenv("ARK_API_KEY")
-ARK_EMBED_MODEL = os.getenv("ARK_EMBED_MODEL")
-ARK_BASE_URL = os.getenv("ARK_BASE_URL")
+# ============== 从 .env 读取固定配置（带默认值） ==============
+ARK_API_KEY = os.getenv("ARK_API_KEY", "")
+ARK_EMBED_MODEL = os.getenv("ARK_EMBED_MODEL", "text-embedding-v3")
+ARK_BASE_URL = os.getenv("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
 
-CHUNK_MAX_CHARS = int(os.getenv("CHUNK_MAX_CHARS"))
-CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP"))
+CHUNK_MAX_CHARS = int(os.getenv("CHUNK_MAX_CHARS", "500"))
+CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
 
-TOP_K = int(os.getenv("TOP_K"))
-SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD"))
+TOP_K = int(os.getenv("TOP_K", "5"))
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.7"))
 
-BATCH_SIZE = int(os.getenv("BATCH_SIZE"))
+BATCH_SIZE = int(os.getenv("BATCH_SIZE", "10"))
 
 # ============== 固定配置校验 ==============
 def validate_fixed_config():

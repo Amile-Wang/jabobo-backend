@@ -2,6 +2,10 @@ import os
 import sys
 from loguru import logger
 
+# Windows 控制台编码设置
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # 1. 创建日志文件夹
 LOG_DIR = "logs"
 if not os.path.exists(LOG_DIR):
@@ -12,9 +16,10 @@ logger.remove()
 
 # 3. 配置控制台输出（带颜色，适合开发看）
 logger.add(
-    sys.stdout, 
+    sys.stdout,
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-    level="INFO"
+    level="INFO",
+    enqueue=True
 )
 
 # 4. 配置日志文件（适合生产环境持久化）
