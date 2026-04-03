@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(/c/Users/aryou/.conda/envs/jabobo/python.exe -m pip install aiohttp -q 2>&1)",
-      "Bash(/c/Users/aryou/.conda/envs/jabobo/python.exe -m pip list)"
+      "Bash(/c/Users/aryou/.conda/envs/jabobo/python.exe -m pip list)",
+      "Bash(curl:*)"
     ]
   }
 }

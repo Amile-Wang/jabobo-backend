@@ -9,3 +9,4 @@ pydantic>=2.0.0
 python-multipart>=0.0.6
 aiohttp>=3.9.0
 passlib>=1.7.4
+cryptography>=41.0.0
