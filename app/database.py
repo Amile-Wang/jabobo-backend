@@ -54,7 +54,7 @@ class MySQLConnector:
             logger.error("[ERROR] 拒绝连接：数据库配置为空，请检查 .env 文件")
             return False
         try:
-            self.connection = pymysql.connect(**self.config)
+            self.connection = pymysql.connect(**self.config,ssl={})
             self.cursor = self.connection.cursor()
             logger.info(f"[OK] 数据库连接已建立: {self.config.get('host')}/{self.config.get('database')}")
             return True
