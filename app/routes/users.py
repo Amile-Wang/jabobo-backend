@@ -77,7 +77,7 @@ async def list_users(current_user: dict = Depends(get_current_user)):
         db.close()
 
 # --- 2. 删除用户逻辑 ---
-@router.delete("/users/{username}")
+@router.post("/users/{username}")
 async def delete_user(
     username: str, 
     current_user: dict = Depends(get_current_user)

@@ -138,9 +138,9 @@ async def download_firmware(filename: str):
     """
     print(f"📥 [FIRMWARE_DOWNLOAD] Firmware download requested: {filename}")
 
-    # 允许两种文件名：旧的 Jabob.bin 或新的 Jabobo_<version>.bin
+    # 允许两种文件名：旧的 Jabobo.bin 或新的 Jabobo_<version>.bin
     allowed = False
-    if filename == "Jabob.bin":
+    if filename == "Jabobo.bin":
         allowed = True
     elif filename.startswith("Jabobo_") and filename.endswith(".bin"):
         allowed = True
@@ -153,9 +153,9 @@ async def download_firmware(filename: str):
     ota_dir = "/var/local/jobobo-backend/OTA"
     firmware_path = os.path.join(ota_dir, filename)
 
-    # 如果版本化文件不存在，回退到通用 Jabob.bin（保持向后兼容）
+    # 如果版本化文件不存在，回退到通用 Jabobo.bin（保持向后兼容）
     if not os.path.exists(firmware_path):
-        fallback = os.path.join(ota_dir, "Jabob.bin")
+        fallback = os.path.join(ota_dir, "Jabobo.bin")
         if os.path.exists(fallback):
             firmware_path = fallback
             print(f"⚠️ [FIRMWARE_DOWNLOAD] Requested {filename} not found, falling back to {fallback}")
@@ -234,49 +234,56 @@ async def handle_ota_request(
     # 优先使用设备上报的 application.version 作为固件版本；依次回退到其他可能的字段或默认值
     app_version = (
         (device_info.get("application") or {}).get("version")
-        or "2.0.9"
+        or "2.9.9"
     )
 
     # 优先从数据库读取该设备对应的 expected_version（若存在且非空则覆盖 app_version）
-    firmware_version = app_version
-    try:
-        if db.connect():
-            try:
-                sql = "SELECT expected_version FROM user_personas WHERE jabobo_id = %s"
-                db.cursor.execute(sql, (device_id,))
-                row = db.cursor.fetchone()
-                if row:
-                    # row 预期为 dict-like
-                    ev = None
-                    try:
-                        ev = row.get("expected_version")
-                    except Exception:
-                        # 如果是 tuple/list，也尝试取第一个元素
-                        try:
-                            ev = row[0]
-                        except Exception:
-                            ev = None
-                    if ev:
-                        firmware_version = ev
-            finally:
-                db.close()
-    except Exception as e:
-        print(f"⚠️ [OTA] Failed to read expected_version for {device_id}: {str(e)}")
+    # firmware_version = app_version
+    # try:
+    #     if db.connect():
+    #         try:
+    #             sql = "SELECT expected_version FROM user_personas WHERE jabobo_id = %s"
+    #             db.cursor.execute(sql, (device_id,))
+    #             row = db.cursor.fetchone()
+    #             if row:
+    #                 # row 预期为 dict-like
+    #                 ev = None
+    #                 try:
+    #                     ev = row.get("expected_version")
+    #                 except Exception:
+    #                     # 如果是 tuple/list，也尝试取第一个元素
+    #                     try:
+    #                         ev = row[0]
+    #                     except Exception:
+    #                         ev = None
+    #                 if ev:
+    #                     # firmware_version = ev
+    #                     firmware_version = "2.0.5" # 强制指定为2.0.5以测试版本化文件下载
+    #         finally:
+    #             db.close()
+    # except Exception as e:
+    #     print(f"⚠️ [OTA] Failed to read expected_version for {device_id}: {str(e)}")
 
     # 构造响应，按照设备期望的格式
     # 生成带版本的固件文件名，例如 Jabobo_2.0.3.bin
     # 首先将 firmware_version 清理为 safe_ver，然后确认 OTA 目录中确实存在该版本文件；
-    # 如果不存在则回退到设备上报的 app_version（仍会尝试查找对应文件，若找不到下载路由会回退到通用 Jabob.bin）
+    # 如果不存在则回退到设备上报的 app_version（仍会尝试查找对应文件，若找不到下载路由会回退到通用 Jabobo.bin）
+    firmware_version = "2.0.5" # 强制指定为2.0.5以测试版本化文件下载
     ota_dir = "/var/local/jobobo-backend/OTA"
     safe_ver = str(firmware_version).replace(' ', '_')
     versioned_filename = f"Jabobo_{safe_ver}.bin"
     # 如果版本化文件在 OTA 目录中不存在，则回退到 app_version
     if not os.path.exists(os.path.join(ota_dir, versioned_filename)):
-        safe_ver = str(app_version).replace(' ', '_')
+        logger.warning(f"⚠️ [OTA FIRMWARE] Versioned file {versioned_filename} not found, falling back to Jabobo.bin")
+        # safe_ver = str(app_version).replace(' ', '_')
         # versioned_filename = f"Jabobo_{safe_ver}.bin"
         versioned_filename = f"Jabobo.bin"
+        # 输出错误日志
         # 如果回退后的 app_version 文件仍不存在，则保持使用回退后的 safe_ver，
-        # 下载路由会在找不到该文件时回退到通用 Jabob.bin，确保向后兼容
+        # 下载路由会在找不到该文件时回退到通用 Jabobo.bin，确保向后兼容
+    
+    #输出safe_ver和versioned_filename以供调试
+    logger.info(f"🔧 [OTA FIRMWARE] Using safe_ver: {safe_ver}, versioned_filename: {versioned_filename}")
 
     download_filename = versioned_filename
     download_url = f"http://121.41.168.85:8007/api/xiaozhi/otaMag/download/{download_filename}"
@@ -296,6 +303,9 @@ async def handle_ota_request(
             "url": "ws://121.41.168.85:8000/xiaozhi/v1/"
         }
     }
+    
+    # 输出响应日志response_data
+    logger.info(f"📤 [OTA RESPONSE] To Device {device_id}: {response_data}")
     
     if activation_obj:
         response_data["activation"] = activation_obj

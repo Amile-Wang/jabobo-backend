@@ -180,7 +180,7 @@ async def list_knowledge_base(
             db.close()
 
 # --- 删除接口 ---
-@router.delete("/user/delete-kb")
+@router.post("/user/delete-kb")
 async def delete_knowledge_base(
     jabobo_id: str = Query(..., description="设备ID"),
     file_path: str = Query(..., description="要删除的文件绝对路径"),
