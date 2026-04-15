@@ -300,7 +300,7 @@ async def handle_ota_request(
             "force": 0
         },
         "websocket": {
-            "url": "ws://121.41.168.85:8000/xiaozhi/v1/"
+            "url": "ws://51.107.185.69/ws/"
         }
     }
     
