@@ -115,6 +115,10 @@ async def login(req: LoginRequest):
         db.close()
         logger.info("📲 登录请求处理结束")
 
+@router.get("/auth/whoami")
+async def whoami(current_user: dict = Depends(get_current_user)):
+    return {"username": current_user["username"], "role": current_user["role"]}
+
 @router.post("/logout")
 async def logout(current_user: dict = Depends(get_current_user)):
     """
