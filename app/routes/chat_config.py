@@ -1,5 +1,5 @@
 # ... existing code ...
-from fastapi import APIRouter, HTTPException, Header, Path
+from fastapi import APIRouter, HTTPException, Header, Path, Body
 from app.database import db
 import json
 from typing import Dict, Any  # 添加typing导入
@@ -18,11 +18,27 @@ def get_env(key: str) -> str:
 
 # 1. 获取服务器基础配置
 @router.post("/config/server-base")
-async def get_server_base_config():
+async def get_server_base_config(payload: dict = Body(default=None)):
     """
     获取服务器基础配置
     """
     try:
+        # WS URL：可按设备覆盖（payload.mac_address），否则回退到 env
+        ws_url = get_env("WEBSOCKET_URL")
+        mac_address = (payload or {}).get("mac_address", "")
+        mac_address = mac_address.strip() if isinstance(mac_address, str) else ""
+        if mac_address and db.connect():
+            try:
+                db.cursor.execute(
+                    "SELECT websocket_url FROM user_personas WHERE jabobo_id = %s",
+                    (mac_address,)
+                )
+                row = db.cursor.fetchone()
+                if row and row.get("websocket_url"):
+                    ws_url = row["websocket_url"]
+            finally:
+                db.close()
+
         # 模拟服务器基础配置
         server_config = {
             "delete_audio": True,
@@ -36,7 +52,7 @@ async def get_server_base_config():
             "server": {
                 "sms_max_send_count": 10,
                 "fronted_url": get_env("FRONTED_URL"),
-                "websocket": get_env("WEBSOCKET_URL"),
+                "websocket": ws_url,
                 "name": "xiaozhi-esp32-server",
                 "mcp_endpoint": get_env("MCP_ENDPOINT"),
                 "voice_print": get_env("VOICEPRINT_URL"),
@@ -153,7 +169,8 @@ async def get_agent_models_config(payload: dict):
                 }
             },
             "selected_module": {
-                "TTS": "HuoshanDoubleStreamTTS",
+                "ASR": "ASR_AzureASR",
+                "TTS": "TTS_AzureTTS",
                 "Memory": "Memory_mem_local_short",
                 "Intent": "Intent_intent_llm",
                 "LLM": "LLM_AliLLM",
@@ -191,7 +208,22 @@ async def get_agent_models_config(payload: dict):
                     "frequency_penalty": ""
                 }
             },
+            "ASR": {
+                "ASR_AzureASR": {
+                    "type": "azure",
+                    "subscription_key": get_env("AZURE_SPEECH_KEY"),
+                    "region": get_env("AZURE_SPEECH_REGION"),
+                    "language": "zh-CN",
+                    "output_dir": "tmp/"
+                }
+            },
             "TTS": {
+                "TTS_AzureTTS": {
+                    "type": "azure",
+                    "subscription_key": get_env("AZURE_SPEECH_KEY"),
+                    "region": get_env("AZURE_SPEECH_REGION"),
+                    "voice": get_env("AZURE_TTS_VOICE") or "zh-CN-XiaoxiaoNeural"
+                },
                 "TTS_TencentTTS": {
                     "type": "tencent",
                     "appid": "1391329716",

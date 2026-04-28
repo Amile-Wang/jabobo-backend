@@ -31,8 +31,8 @@ async def get_user_config(
 
         # SQL查询添加版本号字段
         sql = """
-            SELECT personas, memory, current_version, expected_version 
-            FROM user_personas 
+            SELECT personas, memory, current_version, expected_version, websocket_url
+            FROM user_personas
             WHERE username = %s AND jabobo_id = %s
         """
         cursor.execute(sql, (x_username, jabobo_id))
@@ -44,12 +44,14 @@ async def get_user_config(
             memory_data = ""
             current_version = "1.0.0"
             expected_version = "1.0.0"
+            websocket_url = ""
             logger.info(f"ℹ️ [GET CONFIG] 未找到记录，为用户 {x_username} 使用默认配置")
         else:
             raw_persona = config.get('personas') or "[]"
             memory_data = config.get('memory') or ""
             current_version = config.get('current_version') or "1.0.0"
             expected_version = config.get('expected_version') or "1.0.0"
+            websocket_url = config.get('websocket_url') or ""
         
         # 数据类型统一+安全处理
         raw_persona = str(raw_persona).strip() if raw_persona else "[]"
@@ -65,14 +67,15 @@ async def get_user_config(
         logger.info(f"📌 Version: Current={current_version} | Expected={expected_version}")
 
         return {
-            "success": True, 
+            "success": True,
             "data": {
-                "persona": final_persona,  
+                "persona": final_persona,
                 "memory": memory_str,
                 "voice_status": "已就绪",
                 "kb_status": "已同步",
                 "current_version": current_version,
-                "expected_version": expected_version
+                "expected_version": expected_version,
+                "websocket_url": websocket_url
             }
         }
     except HTTPException:
@@ -112,6 +115,8 @@ async def sync_config(
         jabobo_id = payload.get('jabobo_id', '').strip()
         persona_json = payload.get('persona', '[]') if payload.get('persona') is not None else '[]'
         memory = payload.get('memory', '') if payload.get('memory') is not None else ''
+        ws_url_raw = payload.get('websocket_url', '')
+        websocket_url = ws_url_raw.strip() if isinstance(ws_url_raw, str) and ws_url_raw.strip() else None
 
         if not jabobo_id:
             logger.warning(f"⚠️ [SYNC CONFIG] User {x_username} 提交的 payload 缺少 jabobo_id")
@@ -139,11 +144,14 @@ async def sync_config(
 
         # 写入数据库
         sql = """
-            INSERT INTO user_personas (username, jabobo_id, personas, memory) 
-            VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE personas = VALUES(personas), memory = VALUES(memory)
+            INSERT INTO user_personas (username, jabobo_id, personas, memory, websocket_url)
+            VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                personas = VALUES(personas),
+                memory = VALUES(memory),
+                websocket_url = VALUES(websocket_url)
         """
-        cursor.execute(sql, (x_username, jabobo_id, persona_json, memory))
+        cursor.execute(sql, (x_username, jabobo_id, persona_json, memory, websocket_url))
         db.connection.commit()
         
         logger.success(f"✅ [SYNC CONFIG] Database updated for User: {x_username} / Device: {jabobo_id}")

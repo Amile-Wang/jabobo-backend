@@ -203,13 +203,14 @@ async def handle_ota_request(
     try:
         logger.debug(f"🔍 [OTA CHECK] Checking registration for {device_id}")
         
-        sql = "SELECT username FROM user_personas WHERE jabobo_id = %s"
+        sql = "SELECT username, websocket_url FROM user_personas WHERE jabobo_id = %s"
         db.cursor.execute(sql, (device_id,))
         existing_device = db.cursor.fetchone()
-        
+
         activation_obj = None
         activation_code = None
-        
+        device_ws_url = existing_device.get("websocket_url") if existing_device else None
+
         if existing_device:
             logger.info(f"✅ [OTA CHECK] Device {device_id} is registered to: {existing_device.get('username')}")
         else:
@@ -300,7 +301,7 @@ async def handle_ota_request(
             "force": 0
         },
         "websocket": {
-            "url": "ws://51.107.185.69/ws/"
+            "url": device_ws_url or os.getenv("WEBSOCKET_URL", "ws://51.107.185.69/ws/")
         }
     }
     
