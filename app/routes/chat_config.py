@@ -96,7 +96,7 @@ async def get_server_base_config(payload: dict = Body(default=None)):
                     "type": "silero",
                     "model_dir": "models/snakers4_silero-vad",
                     "threshold": "0.65",
-                    "min_silence_duration_ms": "800"
+                    "min_silence_duration_ms": "500"
                 }
             },
             "summaryMemory": None,
@@ -153,9 +153,12 @@ async def get_agent_models_config(payload: dict):
         
         # 从数据库获取设备特定配置
         device_prompt, device_memory = await get_device_config(mac_address)
-        
+
         # 根据设备MAC地址获取声纹列表
         voiceprint_list = await get_voiceprint_list_by_mac(mac_address)
+
+        # 读取设备的 ASR/TTS provider 选择
+        device_asr_provider, device_tts_provider = await get_device_providers(mac_address)
         
         # 模拟代理模型配置
         agent_models_config = {
@@ -169,8 +172,8 @@ async def get_agent_models_config(payload: dict):
                 }
             },
             "selected_module": {
-                "ASR": "ASR_AzureASR",
-                "TTS": "TTS_AzureTTS",
+                "ASR": _resolve_asr_module_name(device_asr_provider),
+                "TTS": _resolve_tts_module_name(device_tts_provider),
                 "Memory": "Memory_mem_local_short",
                 "Intent": "Intent_intent_llm",
                 "LLM": "LLM_AliLLM",
@@ -209,6 +212,11 @@ async def get_agent_models_config(payload: dict):
                 }
             },
             "ASR": {
+                "ASR_FunASR": {
+                    "type": "fun_local",
+                    "model_dir": "models/SenseVoiceSmall",
+                    "output_dir": "tmp/"
+                },
                 "ASR_AzureASR": {
                     "type": "azure",
                     "subscription_key": get_env("AZURE_SPEECH_KEY"),
@@ -327,6 +335,54 @@ async def get_voiceprint_list_by_mac(mac_address: str):
     finally:
         if connection:
             db.close()
+
+# 设备 ASR/TTS provider 字符串到 selected_module 名称的映射
+_ASR_PROVIDER_TO_MODULE = {
+    "funasr": "ASR_FunASR",
+    "azure_asr": "ASR_AzureASR",
+}
+_TTS_PROVIDER_TO_MODULE = {
+    "huoshan_double_stream": "HuoshanDoubleStreamTTS",
+    "azure_tts": "TTS_AzureTTS",
+}
+_DEFAULT_ASR_MODULE = "ASR_FunASR"
+_DEFAULT_TTS_MODULE = "HuoshanDoubleStreamTTS"
+
+
+def _resolve_asr_module_name(provider: str) -> str:
+    return _ASR_PROVIDER_TO_MODULE.get(provider or "", _DEFAULT_ASR_MODULE)
+
+
+def _resolve_tts_module_name(provider: str) -> str:
+    return _TTS_PROVIDER_TO_MODULE.get(provider or "", _DEFAULT_TTS_MODULE)
+
+
+async def get_device_providers(jabobo_id: str) -> tuple:
+    """读取设备绑定记录中的 asr_provider / tts_provider；找不到返回 ('', '')。"""
+    if not jabobo_id:
+        return "", ""
+    connection = None
+    try:
+        connection = db.connect()
+        if not connection:
+            logger.error("🔥 Database connection failed (providers)")
+            return "", ""
+        sql = "SELECT asr_provider, tts_provider FROM user_personas WHERE jabobo_id = %s"
+        cursor = db.cursor
+        cursor.execute(sql, (jabobo_id,))
+        result = cursor.fetchone()
+        if not result:
+            return "", ""
+        asr = (result.get("asr_provider") or "").strip()
+        tts = (result.get("tts_provider") or "").strip()
+        return asr, tts
+    except Exception as e:
+        logger.error(f"🔥 [PROVIDERS] DB error for {jabobo_id}: {e}")
+        return "", ""
+    finally:
+        if connection:
+            db.close()
+
 
 # 新增函数：根据设备MAC地址获取设备配置（人设和记忆）
 async def get_device_config(jabobo_id: str) -> tuple:

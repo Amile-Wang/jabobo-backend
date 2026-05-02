@@ -31,7 +31,8 @@ async def get_user_config(
 
         # SQL查询添加版本号字段
         sql = """
-            SELECT personas, memory, current_version, expected_version, websocket_url
+            SELECT personas, memory, current_version, expected_version,
+                   websocket_url, websocket_url_list, asr_provider, tts_provider
             FROM user_personas
             WHERE username = %s AND jabobo_id = %s
         """
@@ -45,6 +46,9 @@ async def get_user_config(
             current_version = "1.0.0"
             expected_version = "1.0.0"
             websocket_url = ""
+            websocket_url_list_raw = ""
+            asr_provider = ""
+            tts_provider = ""
             logger.info(f"ℹ️ [GET CONFIG] 未找到记录，为用户 {x_username} 使用默认配置")
         else:
             raw_persona = config.get('personas') or "[]"
@@ -52,6 +56,17 @@ async def get_user_config(
             current_version = config.get('current_version') or "1.0.0"
             expected_version = config.get('expected_version') or "1.0.0"
             websocket_url = config.get('websocket_url') or ""
+            websocket_url_list_raw = config.get('websocket_url_list') or ""
+            asr_provider = config.get('asr_provider') or ""
+            tts_provider = config.get('tts_provider') or ""
+
+        # websocket_url_list 是 JSON 字符串数组，解析失败时返回空列表
+        try:
+            websocket_url_list = json.loads(websocket_url_list_raw) if websocket_url_list_raw else []
+            if not isinstance(websocket_url_list, list):
+                websocket_url_list = []
+        except (json.JSONDecodeError, TypeError):
+            websocket_url_list = []
         
         # 数据类型统一+安全处理
         raw_persona = str(raw_persona).strip() if raw_persona else "[]"
@@ -75,7 +90,10 @@ async def get_user_config(
                 "kb_status": "已同步",
                 "current_version": current_version,
                 "expected_version": expected_version,
-                "websocket_url": websocket_url
+                "websocket_url": websocket_url,
+                "websocket_url_list": websocket_url_list,
+                "asr_provider": asr_provider,
+                "tts_provider": tts_provider
             }
         }
     except HTTPException:
@@ -118,6 +136,35 @@ async def sync_config(
         ws_url_raw = payload.get('websocket_url', '')
         websocket_url = ws_url_raw.strip() if isinstance(ws_url_raw, str) and ws_url_raw.strip() else None
 
+        # websocket_url_list: 用户保存的候选 WS 地址列表（数组），写入前序列化为 JSON
+        ws_list_raw = payload.get('websocket_url_list', None)
+        if isinstance(ws_list_raw, list):
+            cleaned = []
+            seen = set()
+            for item in ws_list_raw:
+                if isinstance(item, str):
+                    s = item.strip()
+                    if s and s not in seen:
+                        cleaned.append(s)
+                        seen.add(s)
+            websocket_url_list_json = json.dumps(cleaned, ensure_ascii=False) if cleaned else None
+        else:
+            websocket_url_list_json = None
+
+        # ASR/TTS 模型选择，仅接受白名单内取值
+        ALLOWED_ASR = {"funasr", "azure_asr"}
+        ALLOWED_TTS = {"huoshan_double_stream", "azure_tts"}
+        asr_raw = payload.get('asr_provider', '')
+        tts_raw = payload.get('tts_provider', '')
+        asr_provider = asr_raw.strip() if isinstance(asr_raw, str) else ''
+        tts_provider = tts_raw.strip() if isinstance(tts_raw, str) else ''
+        if asr_provider and asr_provider not in ALLOWED_ASR:
+            raise HTTPException(status_code=400, detail=f"asr_provider 非法: {asr_provider}")
+        if tts_provider and tts_provider not in ALLOWED_TTS:
+            raise HTTPException(status_code=400, detail=f"tts_provider 非法: {tts_provider}")
+        asr_provider_db = asr_provider or None
+        tts_provider_db = tts_provider or None
+
         if not jabobo_id:
             logger.warning(f"⚠️ [SYNC CONFIG] User {x_username} 提交的 payload 缺少 jabobo_id")
             raise HTTPException(status_code=400, detail="缺少 jabobo_id")
@@ -144,14 +191,22 @@ async def sync_config(
 
         # 写入数据库
         sql = """
-            INSERT INTO user_personas (username, jabobo_id, personas, memory, websocket_url)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO user_personas
+                (username, jabobo_id, personas, memory,
+                 websocket_url, websocket_url_list, asr_provider, tts_provider)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 personas = VALUES(personas),
                 memory = VALUES(memory),
-                websocket_url = VALUES(websocket_url)
+                websocket_url = VALUES(websocket_url),
+                websocket_url_list = VALUES(websocket_url_list),
+                asr_provider = VALUES(asr_provider),
+                tts_provider = VALUES(tts_provider)
         """
-        cursor.execute(sql, (x_username, jabobo_id, persona_json, memory, websocket_url))
+        cursor.execute(sql, (
+            x_username, jabobo_id, persona_json, memory,
+            websocket_url, websocket_url_list_json, asr_provider_db, tts_provider_db
+        ))
         db.connection.commit()
         
         logger.success(f"✅ [SYNC CONFIG] Database updated for User: {x_username} / Device: {jabobo_id}")

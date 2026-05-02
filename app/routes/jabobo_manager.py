@@ -29,20 +29,24 @@ async def get_user_jabobo_ids(
         verify_user(x_username, authorization)
         logger.success(f"✅ 身份验证通过：用户名={x_username}")
         
-        sql = "SELECT jabobo_id FROM user_personas WHERE username = %s"
+        sql = "SELECT jabobo_id, device_name FROM user_personas WHERE username = %s"
         logger.debug(f"🔍 执行SQL：{sql} | 参数：({x_username})")
-        
+
         db.cursor.execute(sql, (x_username,))
         rows = db.cursor.fetchall()
-        
+
         logger.debug(f"📊 查询到的行数：{len(rows)}")
-        
+
         ids = [row['jabobo_id'] for row in rows]
-        
+        jabobos = [
+            {"jabobo_id": row['jabobo_id'], "device_name": row.get('device_name')}
+            for row in rows
+        ]
+
         logger.info(f"📋 [LIST] User: {x_username} | Devices: {ids}")
-        logger.debug(f"📤 返回结果：success=True, jabobo_ids={ids}")
-        
-        return {"success": True, "jabobo_ids": ids}
+        logger.debug(f"📤 返回结果：success=True, jabobo_ids={ids}, jabobos={jabobos}")
+
+        return {"success": True, "jabobo_ids": ids, "jabobos": jabobos}
     finally:
         db.close()
 
@@ -195,5 +199,49 @@ async def rebind_jabobo(
 
         logger.success(f"🔄 [REBIND] User: {x_username} | {old_id} -> {new_id}")
         return {"success": True, "message": "设备换绑成功，人设已迁移"}
+    finally:
+        db.close()
+
+# 6. 设备重命名接口
+@router.put("/user/rename_device")
+async def rename_jabobo(
+    payload: dict = Body(...),
+    x_username: str = Header(...),
+    authorization: str = Header(...)
+):
+    jabobo_id = payload.get("jabobo_id")
+    raw_name = payload.get("device_name")
+
+    if not jabobo_id:
+        raise HTTPException(status_code=400, detail="缺少设备 ID")
+
+    if raw_name is None:
+        device_name = None
+    else:
+        device_name = str(raw_name).strip()
+        if device_name == "":
+            device_name = None
+        elif len(device_name) > 64:
+            raise HTTPException(status_code=400, detail="设备名称长度不能超过 64 个字符")
+
+    if not db.connect():
+        raise HTTPException(status_code=500, detail="数据库连接失败")
+    try:
+        verify_user(x_username, authorization)
+
+        sql = """
+            UPDATE user_personas
+            SET device_name = %s
+            WHERE username = %s AND jabobo_id = %s
+        """
+        db.cursor.execute(sql, (device_name, x_username, jabobo_id))
+        db.cursor.connection.commit()
+
+        if db.cursor.rowcount == 0:
+            logger.warning(f"⚠️ [RENAME] Device not found: {jabobo_id} for user {x_username}")
+            return {"success": False, "message": "未找到该设备或无权操作"}
+
+        logger.success(f"✏️ [RENAME] User: {x_username} | {jabobo_id} -> name={device_name!r}")
+        return {"success": True, "message": "重命名成功", "device_name": device_name}
     finally:
         db.close()
