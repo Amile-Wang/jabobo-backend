@@ -157,8 +157,13 @@ async def get_agent_models_config(payload: dict):
         # 根据设备MAC地址获取声纹列表
         voiceprint_list = await get_voiceprint_list_by_mac(mac_address)
 
-        # 读取设备的 ASR/TTS provider 选择
-        device_asr_provider, device_tts_provider = await get_device_providers(mac_address)
+        # 读取设备的 ASR/TTS/LLM provider + TTS 音色选择
+        providers = await get_device_providers(mac_address)
+        device_asr_provider = providers["asr"]
+        device_tts_provider = providers["tts"]
+        device_llm_provider = providers["llm"]
+        device_azure_voice = providers["azure_voice_id"] or get_env("AZURE_TTS_VOICE") or "zh-CN-XiaoxiaoNeural"
+        device_huoshan_voice = providers["huoshan_voice_id"] or "custom_mix_bigtts"
         
         # 模拟代理模型配置
         agent_models_config = {
@@ -176,12 +181,12 @@ async def get_agent_models_config(payload: dict):
                 "TTS": _resolve_tts_module_name(device_tts_provider),
                 "Memory": "Memory_mem_local_short",
                 "Intent": "Intent_intent_llm",
-                "LLM": "LLM_AliLLM",
+                "LLM": _resolve_llm_module_name(device_llm_provider),
                 "VLLM": "VLLM_ChatGLMVLLM"
             },
             "Intent": {
                 "Intent_intent_llm": {
-                    "llm": "LLM_AliLLM",
+                    "llm": _resolve_llm_module_name(device_llm_provider),
                     "type": "intent_llm",
                 }
             },
@@ -200,15 +205,24 @@ async def get_agent_models_config(payload: dict):
                     "device_max_output_size": "0"
                 },
                 "LLM_DeepSeekLLM": {
-                    "type": "openai", 
-                    "top_k": "", 
-                    "top_p": "", 
-                    "api_key": get_env("DEEPSEEK_LLM_API_KEY"), 
-                    "base_url": get_env("DEEPSEEK_LLM_BASE_URL"), 
-                    "max_tokens": "", 
-                    "model_name": "deepseek-chat", 
-                    "temperature": "", 
+                    "type": "openai",
+                    "top_k": "",
+                    "top_p": "",
+                    "api_key": get_env("DEEPSEEK_LLM_API_KEY"),
+                    "base_url": get_env("DEEPSEEK_LLM_BASE_URL"),
+                    "max_tokens": "",
+                    "model_name": "deepseek-chat",
+                    "temperature": "",
                     "frequency_penalty": ""
+                },
+                "LLM_AzureGPTNano": {
+                    "type": "openai",
+                    "api_key": get_env("AZURE_GPT_API_KEY"),
+                    "base_url": get_env("AZURE_GPT_BASE_URL"),
+                    "max_tokens": "500",
+                    "max_tokens_param": "max_completion_tokens",
+                    "model_name": "gpt-5.4-nano",
+                    "temperature": "0.3"
                 }
             },
             "ASR": {
@@ -230,7 +244,7 @@ async def get_agent_models_config(payload: dict):
                     "type": "azure",
                     "subscription_key": get_env("AZURE_SPEECH_KEY"),
                     "region": get_env("AZURE_SPEECH_REGION"),
-                    "voice": get_env("AZURE_TTS_VOICE") or "zh-CN-XiaoxiaoNeural"
+                    "voice": device_azure_voice
                 },
                 "TTS_TencentTTS": {
                     "type": "tencent",
@@ -249,6 +263,7 @@ async def get_agent_models_config(payload: dict):
                     "access_token": get_env("HUOSHAN_TTS_ACCESS_TOKEN"),
                     "resource_id": "volc.service_type.10029",
                     "ws_url": "wss://openspeech.bytedance.com/api/v3/tts/bidirection",
+                    "speaker": device_huoshan_voice,
                 }
             },
             "voiceprint": {
@@ -345,8 +360,14 @@ _TTS_PROVIDER_TO_MODULE = {
     "huoshan_double_stream": "HuoshanDoubleStreamTTS",
     "azure_tts": "TTS_AzureTTS",
 }
+_LLM_PROVIDER_TO_MODULE = {
+    "qwen-turbo": "LLM_AliLLM",
+    "deepseek-v4-flash": "LLM_DeepSeekLLM",
+    "gpt-5.4-nano": "LLM_AzureGPTNano",
+}
 _DEFAULT_ASR_MODULE = "ASR_FunASR"
 _DEFAULT_TTS_MODULE = "HuoshanDoubleStreamTTS"
+_DEFAULT_LLM_MODULE = "LLM_AliLLM"
 
 
 def _resolve_asr_module_name(provider: str) -> str:
@@ -357,28 +378,46 @@ def _resolve_tts_module_name(provider: str) -> str:
     return _TTS_PROVIDER_TO_MODULE.get(provider or "", _DEFAULT_TTS_MODULE)
 
 
-async def get_device_providers(jabobo_id: str) -> tuple:
-    """读取设备绑定记录中的 asr_provider / tts_provider；找不到返回 ('', '')。"""
+def _resolve_llm_module_name(provider: str) -> str:
+    return _LLM_PROVIDER_TO_MODULE.get(provider or "", _DEFAULT_LLM_MODULE)
+
+
+_EMPTY_PROVIDERS = {
+    "asr": "", "tts": "", "llm": "",
+    "azure_voice_id": "", "huoshan_voice_id": "",
+}
+
+
+async def get_device_providers(jabobo_id: str) -> dict:
+    """读取设备绑定记录中的 ASR/TTS/LLM provider 和 TTS 音色选择；找不到返回空字段。"""
     if not jabobo_id:
-        return "", ""
+        return dict(_EMPTY_PROVIDERS)
     connection = None
     try:
         connection = db.connect()
         if not connection:
             logger.error("🔥 Database connection failed (providers)")
-            return "", ""
-        sql = "SELECT asr_provider, tts_provider FROM user_personas WHERE jabobo_id = %s"
+            return dict(_EMPTY_PROVIDERS)
+        sql = (
+            "SELECT asr_provider, tts_provider, llm_provider, "
+            "azure_tts_voice_id, huoshan_tts_voice_id "
+            "FROM user_personas WHERE jabobo_id = %s"
+        )
         cursor = db.cursor
         cursor.execute(sql, (jabobo_id,))
         result = cursor.fetchone()
         if not result:
-            return "", ""
-        asr = (result.get("asr_provider") or "").strip()
-        tts = (result.get("tts_provider") or "").strip()
-        return asr, tts
+            return dict(_EMPTY_PROVIDERS)
+        return {
+            "asr": (result.get("asr_provider") or "").strip(),
+            "tts": (result.get("tts_provider") or "").strip(),
+            "llm": (result.get("llm_provider") or "").strip(),
+            "azure_voice_id": (result.get("azure_tts_voice_id") or "").strip(),
+            "huoshan_voice_id": (result.get("huoshan_tts_voice_id") or "").strip(),
+        }
     except Exception as e:
         logger.error(f"🔥 [PROVIDERS] DB error for {jabobo_id}: {e}")
-        return "", ""
+        return dict(_EMPTY_PROVIDERS)
     finally:
         if connection:
             db.close()
