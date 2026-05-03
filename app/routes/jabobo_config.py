@@ -121,7 +121,7 @@ async def get_user_config(
             raw_persona = "[]"
             memory_data = ""
             current_version = "1.0.0"
-            expected_version = "1.0.0"
+            expected_version = ""
             websocket_url = ""
             websocket_url_list_raw = ""
             asr_provider = ""
@@ -136,7 +136,7 @@ async def get_user_config(
             raw_persona = config.get('personas') or "[]"
             memory_data = config.get('memory') or ""
             current_version = config.get('current_version') or "1.0.0"
-            expected_version = config.get('expected_version') or "1.0.0"
+            expected_version = config.get('expected_version') or ""
             websocket_url = config.get('websocket_url') or ""
             websocket_url_list_raw = config.get('websocket_url_list') or ""
             asr_provider = config.get('asr_provider') or ""
@@ -159,7 +159,7 @@ async def get_user_config(
         raw_persona = str(raw_persona).strip() if raw_persona else "[]"
         memory_str = str(memory_data).strip() if memory_data else ""
         current_version = str(current_version).strip() or "1.0.0"
-        expected_version = str(expected_version).strip() or "1.0.0"
+        expected_version = str(expected_version).strip()
 
         final_persona = raw_persona if raw_persona else "[]"
 

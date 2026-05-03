@@ -9,6 +9,12 @@ import os
 from fastapi.requests import Request
 from loguru import logger  # 导入 loguru
 
+OTA_DIR = os.getenv("OTA_DIR", "/home/azureuser/tianhao/my_code/Jabobo/jabobo-backend/OTA")
+OTA_DOWNLOAD_BASE_URL = os.getenv(
+    "OTA_DOWNLOAD_BASE_URL",
+    "http://51.107.185.69/api/xiaozhi/otaMag/download",
+).rstrip("/")
+
 router = APIRouter()
 
 # 无需鉴权：通过jabobo_id读取设备所有数据
@@ -129,6 +135,29 @@ async def update_device_version(
     finally:
         db.close()
 
+# 列出 OTA 目录下所有可下发的固件（供前端选择目标版本）
+@router.get("/xiaozhi/otaMag/list")
+async def list_firmwares():
+    items = []
+    if os.path.isdir(OTA_DIR):
+        for name in sorted(os.listdir(OTA_DIR)):
+            if not name.endswith(".bin"):
+                continue
+            path = os.path.join(OTA_DIR, name)
+            if not os.path.isfile(path):
+                continue
+            version = None
+            if name.startswith("Jabobo_") and name.endswith(".bin"):
+                version = name[len("Jabobo_"):-len(".bin")]
+            elif name == "Jabobo.bin":
+                version = ""  # 通用版本，不绑定具体版本号
+            items.append({
+                "filename": name,
+                "version": version,
+                "size": os.path.getsize(path),
+            })
+    return {"success": True, "data": items}
+
 # 添加固件下载路由
 @router.get("/xiaozhi/otaMag/download/{filename}")
 @router.head("/xiaozhi/otaMag/download/{filename}")
@@ -150,7 +179,7 @@ async def download_firmware(filename: str):
         raise HTTPException(status_code=404, detail="Firmware file not found")
 
     # 优先在 OTA 目录中查找与请求名称匹配的文件
-    ota_dir = "/var/local/jobobo-backend/OTA"
+    ota_dir = OTA_DIR
     firmware_path = os.path.join(ota_dir, filename)
 
     # 如果版本化文件不存在，回退到通用 Jabobo.bin（保持向后兼容）
@@ -232,62 +261,52 @@ async def handle_ota_request(
     finally:
         db.close()
     
-    # 优先使用设备上报的 application.version 作为固件版本；依次回退到其他可能的字段或默认值
+    # 设备当前版本（用于响应 firmware.version 字段，不代表要升级）
     app_version = (
         (device_info.get("application") or {}).get("version")
-        or "2.9.9"
+        or "0.0.0"
     )
 
-    # 优先从数据库读取该设备对应的 expected_version（若存在且非空则覆盖 app_version）
-    # firmware_version = app_version
-    # try:
-    #     if db.connect():
-    #         try:
-    #             sql = "SELECT expected_version FROM user_personas WHERE jabobo_id = %s"
-    #             db.cursor.execute(sql, (device_id,))
-    #             row = db.cursor.fetchone()
-    #             if row:
-    #                 # row 预期为 dict-like
-    #                 ev = None
-    #                 try:
-    #                     ev = row.get("expected_version")
-    #                 except Exception:
-    #                     # 如果是 tuple/list，也尝试取第一个元素
-    #                     try:
-    #                         ev = row[0]
-    #                     except Exception:
-    #                         ev = None
-    #                 if ev:
-    #                     # firmware_version = ev
-    #                     firmware_version = "2.0.5" # 强制指定为2.0.5以测试版本化文件下载
-    #         finally:
-    #             db.close()
-    # except Exception as e:
-    #     print(f"⚠️ [OTA] Failed to read expected_version for {device_id}: {str(e)}")
+    # 从数据库读取 expected_version；为空则默认不下发升级 url，设备保持现状
+    expected_version = None
+    if db.connect():
+        try:
+            sql = "SELECT expected_version FROM user_personas WHERE jabobo_id = %s"
+            db.cursor.execute(sql, (device_id,))
+            row = db.cursor.fetchone()
+            if row:
+                ev = row.get("expected_version") if isinstance(row, dict) else row[0]
+                if ev and str(ev).strip():
+                    expected_version = str(ev).strip()
+        except Exception as e:
+            logger.warning(f"⚠️ [OTA] Failed to read expected_version for {device_id}: {e}")
+        finally:
+            db.close()
 
-    # 构造响应，按照设备期望的格式
-    # 生成带版本的固件文件名，例如 Jabobo_2.0.3.bin
-    # 首先将 firmware_version 清理为 safe_ver，然后确认 OTA 目录中确实存在该版本文件；
-    # 如果不存在则回退到设备上报的 app_version（仍会尝试查找对应文件，若找不到下载路由会回退到通用 Jabobo.bin）
-    firmware_version = "2.0.5" # 强制指定为2.0.5以测试版本化文件下载
-    ota_dir = "/var/local/jobobo-backend/OTA"
-    safe_ver = str(firmware_version).replace(' ', '_')
-    versioned_filename = f"Jabobo_{safe_ver}.bin"
-    # 如果版本化文件在 OTA 目录中不存在，则回退到 app_version
-    if not os.path.exists(os.path.join(ota_dir, versioned_filename)):
-        logger.warning(f"⚠️ [OTA FIRMWARE] Versioned file {versioned_filename} not found, falling back to Jabobo.bin")
-        # safe_ver = str(app_version).replace(' ', '_')
-        # versioned_filename = f"Jabobo_{safe_ver}.bin"
-        versioned_filename = f"Jabobo.bin"
-        # 输出错误日志
-        # 如果回退后的 app_version 文件仍不存在，则保持使用回退后的 safe_ver，
-        # 下载路由会在找不到该文件时回退到通用 Jabobo.bin，确保向后兼容
-    
-    #输出safe_ver和versioned_filename以供调试
-    logger.info(f"🔧 [OTA FIRMWARE] Using safe_ver: {safe_ver}, versioned_filename: {versioned_filename}")
+    # 默认 firmware 块：不带 url，固件端见不到 url 就不会触发升级
+    firmware_block = {
+        "version": app_version,
+        "force": 0,
+    }
 
-    download_filename = versioned_filename
-    download_url = f"http://121.41.168.85:8007/api/xiaozhi/otaMag/download/{download_filename}"
+    if expected_version:
+        safe_ver = expected_version.replace(' ', '_')
+        versioned_filename = f"Jabobo_{safe_ver}.bin"
+        firmware_path = os.path.join(OTA_DIR, versioned_filename)
+        if os.path.exists(firmware_path):
+            firmware_block["version"] = safe_ver
+            firmware_block["url"] = f"{OTA_DOWNLOAD_BASE_URL}/{versioned_filename}"
+            logger.info(
+                f"📦 [OTA FIRMWARE] device={device_id} current={app_version} "
+                f"target={safe_ver} url={firmware_block['url']}"
+            )
+        else:
+            logger.warning(
+                f"⚠️ [OTA FIRMWARE] device={device_id} expected_version={expected_version} "
+                f"but {versioned_filename} not found in {OTA_DIR}, skipping upgrade"
+            )
+    else:
+        logger.info(f"🔕 [OTA FIRMWARE] device={device_id} expected_version is empty, no upgrade")
 
     response_data = {
         "server_time": {
@@ -295,11 +314,7 @@ async def handle_ota_request(
             "timeZone": "Asia/Shanghai",
             "timezone_offset": 480
         },
-        "firmware": {
-            "version": safe_ver,
-            "url": download_url,
-            "force": 0
-        },
+        "firmware": firmware_block,
         "websocket": {
             "url": device_ws_url or os.getenv("WEBSOCKET_URL", "ws://51.107.185.69/ws/")
         }
