@@ -1,0 +1,23 @@
+Introduction to Simulation Team 
+Simulation Team is a shared function under the OneGN roof, located in Xiamen.
+Responsible for simulation driven design and validation across different domains, including: mechanical, thermal, optical, vibro-acoustic, computational fluid dynamics...and always be passionate looking into new category of simulations to solve issues we face in product development.
+Their mission is to drive high-quality product design through simulation, reducing development costs and time while improving product performance and reliability.
+To know more about them, you could visit their homepage on my GN website.
+
+Core Capabilities for Simulation Team
+Simulation team's expertise spans a wide range of domains:
+Structural Analysis: Drop tests, strength checks, headband evaluations.
+Thermal Simulation: Natural convection, passive/fan cooling solutions.
+Optical Simulation: Ray tracing, laser welding, LED luminance analysis.
+Electromagnetic & CFD: Wireless charging, airflow, droplet movement.
+Vibro-acoustic Analysis: Resonance frequency, driver basket behavior.
+Material Validation: Sustainable plastics, naming rules, supplier templates.
+
+They also manage a Material Database and use tools like COMSOL, Fluent, Altair, and Abaqus across multiple workstations.
+
+Simulation team members
+Alice Lin: system integration manager, simulation team lead.
+Samuel Gao: expert for Structural analysis, Simulation system management, New simulation technology development.
+Taylor Wang: expert for Structural analysis, Thermal simulation, new simulation category development.
+Arthur You: expert for Thermal simulation, Structural analysis, Parameter optimization, Secondary development.
+Tianhao Wang: student help, support in basic structural analysis support, Support in simulation test validation; Support in teardown.

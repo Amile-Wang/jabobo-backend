@@ -106,10 +106,11 @@ async def get_user_config(
 
         # SQL查询添加版本号字段
         sql = """
-            SELECT personas, memory, current_version, expected_version,
+            SELECT personas, memory, current_version, expected_version, force_install,
                    websocket_url, websocket_url_list, asr_provider, tts_provider, llm_provider,
                    azure_tts_voice_id, azure_tts_voice_list,
-                   huoshan_tts_voice_id, huoshan_tts_voice_list
+                   huoshan_tts_voice_id, huoshan_tts_voice_list,
+                   rag_enabled
             FROM user_personas
             WHERE username = %s AND jabobo_id = %s
         """
@@ -122,6 +123,7 @@ async def get_user_config(
             memory_data = ""
             current_version = "1.0.0"
             expected_version = ""
+            force_install = 0
             websocket_url = ""
             websocket_url_list_raw = ""
             asr_provider = ""
@@ -131,12 +133,17 @@ async def get_user_config(
             azure_voice_list_raw = None
             huoshan_voice_id = ""
             huoshan_voice_list_raw = None
+            rag_enabled = False
             logger.info(f"ℹ️ [GET CONFIG] 未找到记录，为用户 {x_username} 使用默认配置")
         else:
             raw_persona = config.get('personas') or "[]"
             memory_data = config.get('memory') or ""
             current_version = config.get('current_version') or "1.0.0"
             expected_version = config.get('expected_version') or ""
+            try:
+                force_install = int(config.get('force_install') or 0)
+            except (TypeError, ValueError):
+                force_install = 0
             websocket_url = config.get('websocket_url') or ""
             websocket_url_list_raw = config.get('websocket_url_list') or ""
             asr_provider = config.get('asr_provider') or ""
@@ -146,6 +153,7 @@ async def get_user_config(
             azure_voice_list_raw = config.get('azure_tts_voice_list')
             huoshan_voice_id = config.get('huoshan_tts_voice_id') or ""
             huoshan_voice_list_raw = config.get('huoshan_tts_voice_list')
+            rag_enabled = bool(config.get('rag_enabled') or 0)
 
         # websocket_url_list 是 JSON 字符串数组，解析失败时返回空列表
         try:
@@ -177,6 +185,7 @@ async def get_user_config(
                 "kb_status": "已同步",
                 "current_version": current_version,
                 "expected_version": expected_version,
+                "force_install": force_install,
                 "websocket_url": websocket_url,
                 "websocket_url_list": websocket_url_list,
                 "asr_provider": asr_provider,
@@ -186,6 +195,7 @@ async def get_user_config(
                 "azure_tts_voice_list": _parse_voice_list(azure_voice_list_raw, default_id=DEFAULT_AZURE_VOICE_ID),
                 "huoshan_tts_voice_id": huoshan_voice_id,
                 "huoshan_tts_voice_list": _parse_voice_list(huoshan_voice_list_raw, default_id=DEFAULT_HUOSHAN_VOICE_ID),
+                "rag_enabled": rag_enabled,
             }
         }
     except HTTPException:
@@ -281,6 +291,9 @@ async def sync_config(
             field_name='huoshan_tts_voice_list',
         )
 
+        # rag_enabled: 对话路径是否触发 /generate-rag-prompt，不影响知识库上传
+        rag_enabled_db = 1 if bool(payload.get('rag_enabled', False)) else 0
+
         if not jabobo_id:
             logger.warning(f"⚠️ [SYNC CONFIG] User {x_username} 提交的 payload 缺少 jabobo_id")
             raise HTTPException(status_code=400, detail="缺少 jabobo_id")
@@ -311,8 +324,9 @@ async def sync_config(
                 (username, jabobo_id, personas, memory,
                  websocket_url, websocket_url_list, asr_provider, tts_provider, llm_provider,
                  azure_tts_voice_id, azure_tts_voice_list,
-                 huoshan_tts_voice_id, huoshan_tts_voice_list)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 huoshan_tts_voice_id, huoshan_tts_voice_list,
+                 rag_enabled)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 personas = VALUES(personas),
                 memory = VALUES(memory),
@@ -324,13 +338,15 @@ async def sync_config(
                 azure_tts_voice_id = VALUES(azure_tts_voice_id),
                 azure_tts_voice_list = VALUES(azure_tts_voice_list),
                 huoshan_tts_voice_id = VALUES(huoshan_tts_voice_id),
-                huoshan_tts_voice_list = VALUES(huoshan_tts_voice_list)
+                huoshan_tts_voice_list = VALUES(huoshan_tts_voice_list),
+                rag_enabled = VALUES(rag_enabled)
         """
         cursor.execute(sql, (
             x_username, jabobo_id, persona_json, memory,
             websocket_url, websocket_url_list_json, asr_provider_db, tts_provider_db, llm_provider_db,
             azure_voice_id_db, azure_voice_list_db,
             huoshan_voice_id_db, huoshan_voice_list_db,
+            rag_enabled_db,
         ))
         db.connection.commit()
         

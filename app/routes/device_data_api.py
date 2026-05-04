@@ -60,38 +60,46 @@ async def get_device_full_data(
         # 7. 确保关闭数据库连接
         db.close()
         
-@router.put("/user/device/update_version", description="更新设备的版本号（current_version/expected_version）")
+@router.put("/user/device/update_version", description="更新设备的版本号（current_version/expected_version/force_install）")
 async def update_device_version(
     jabobo_id: str = Query(..., description="要更新的设备ID"),
     current_version: str = Query(None, description="要设置的当前版本号（如1.0）"),
-    expected_version: str = Query(None, description="要设置的预期版本号（如1.1）")
+    expected_version: str = Query(None, description="要设置的预期版本号（如1.1）"),
+    force_install: int = Query(None, description="是否强制安装目标版本（1=强制，绕过版本号大于比较，可用于回退；0=不强制）")
 ):
     # 1. 设备ID非空校验
     if not jabobo_id.strip():
         raise HTTPException(status_code=400, detail="设备ID不能为空")
-    
+
     # 2. 版本号参数校验
-    if current_version is None and expected_version is None:
-        raise HTTPException(status_code=400, detail="至少需要传入current_version或expected_version其中一个字段")
-    
+    if current_version is None and expected_version is None and force_install is None:
+        raise HTTPException(status_code=400, detail="至少需要传入current_version/expected_version/force_install其中一个字段")
+
+    if force_install is not None and force_install not in (0, 1):
+        raise HTTPException(status_code=400, detail="force_install 仅接受 0 或 1")
+
     # 3. 数据库连接校验
     if not db.connect():
         logger.error("❌ [UPDATE_VERSION] 数据库连接失败")
         raise HTTPException(status_code=500, detail="数据库连接失败")
-    
+
     try:
         # 4. 构造动态更新SQL
         update_fields = []
         update_params = []
-        
+
         if current_version is not None:
             update_fields.append("current_version = %s")
             update_params.append(current_version.strip())
-        
+
         if expected_version is not None:
             update_fields.append("expected_version = %s")
             update_params.append(expected_version.strip())
-        
+
+        if force_install is not None:
+            update_fields.append("force_install = %s")
+            update_params.append(int(force_install))
+
         sql = f"UPDATE user_personas SET {', '.join(update_fields)} WHERE jabobo_id = %s"
         update_params.append(jabobo_id)
         
@@ -110,15 +118,16 @@ async def update_device_version(
             }
         
         # 7. 日志打印
-        logger.success(f"🔄 [UPDATE_VERSION] Device: {jabobo_id} | Current: {current_version} | Expected: {expected_version} | Affected: {affected_rows}")
-        
+        logger.success(f"🔄 [UPDATE_VERSION] Device: {jabobo_id} | Current: {current_version} | Expected: {expected_version} | Force: {force_install} | Affected: {affected_rows}")
+
         return {
             "success": True,
             "message": "设备版本号更新成功",
             "data": {
                 "jabobo_id": jabobo_id,
                 "current_version": current_version,
-                "expected_version": expected_version
+                "expected_version": expected_version,
+                "force_install": force_install,
             }
         }
     
@@ -267,19 +276,28 @@ async def handle_ota_request(
         or "0.0.0"
     )
 
-    # 从数据库读取 expected_version；为空则默认不下发升级 url，设备保持现状
+    # 从数据库读取 expected_version + force_install；前者为空则默认不下发升级 url
     expected_version = None
+    force_install = 0
     if db.connect():
         try:
-            sql = "SELECT expected_version FROM user_personas WHERE jabobo_id = %s"
+            sql = "SELECT expected_version, force_install FROM user_personas WHERE jabobo_id = %s"
             db.cursor.execute(sql, (device_id,))
             row = db.cursor.fetchone()
             if row:
-                ev = row.get("expected_version") if isinstance(row, dict) else row[0]
+                if isinstance(row, dict):
+                    ev = row.get("expected_version")
+                    fi = row.get("force_install")
+                else:
+                    ev, fi = row[0], row[1]
                 if ev and str(ev).strip():
                     expected_version = str(ev).strip()
+                try:
+                    force_install = int(fi or 0)
+                except (TypeError, ValueError):
+                    force_install = 0
         except Exception as e:
-            logger.warning(f"⚠️ [OTA] Failed to read expected_version for {device_id}: {e}")
+            logger.warning(f"⚠️ [OTA] Failed to read expected_version/force_install for {device_id}: {e}")
         finally:
             db.close()
 
@@ -296,9 +314,13 @@ async def handle_ota_request(
         if os.path.exists(firmware_path):
             firmware_block["version"] = safe_ver
             firmware_block["url"] = f"{OTA_DOWNLOAD_BASE_URL}/{versioned_filename}"
+            # force_install=1 时让固件绕过 IsNewVersionAvailable 的"严格大于"比较，
+            # 用于手动回退或同版本重刷（esp_https_ota 仍会拦截 image header version 完全相同的情况）
+            if force_install == 1:
+                firmware_block["force"] = 1
             logger.info(
                 f"📦 [OTA FIRMWARE] device={device_id} current={app_version} "
-                f"target={safe_ver} url={firmware_block['url']}"
+                f"target={safe_ver} force={firmware_block['force']} url={firmware_block['url']}"
             )
         else:
             logger.warning(

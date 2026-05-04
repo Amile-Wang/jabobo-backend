@@ -164,7 +164,8 @@ async def get_agent_models_config(payload: dict):
         device_llm_provider = providers["llm"]
         device_azure_voice = providers["azure_voice_id"] or get_env("AZURE_TTS_VOICE") or "zh-CN-XiaoxiaoNeural"
         device_huoshan_voice = providers["huoshan_voice_id"] or "custom_mix_bigtts"
-        
+        device_rag_enabled = bool(providers.get("rag_enabled", False))
+
         # 模拟代理模型配置
         agent_models_config = {
             "plugins": {
@@ -272,6 +273,7 @@ async def get_agent_models_config(payload: dict):
             },
             "summaryMemory": device_memory,
             "prompt": device_prompt,
+            "rag_enabled": device_rag_enabled,
             "VLLM": {
                 "VLLM_ChatGLMVLLM": {
                     "type": "openai",
@@ -385,6 +387,7 @@ def _resolve_llm_module_name(provider: str) -> str:
 _EMPTY_PROVIDERS = {
     "asr": "", "tts": "", "llm": "",
     "azure_voice_id": "", "huoshan_voice_id": "",
+    "rag_enabled": False,
 }
 
 
@@ -400,7 +403,7 @@ async def get_device_providers(jabobo_id: str) -> dict:
             return dict(_EMPTY_PROVIDERS)
         sql = (
             "SELECT asr_provider, tts_provider, llm_provider, "
-            "azure_tts_voice_id, huoshan_tts_voice_id "
+            "azure_tts_voice_id, huoshan_tts_voice_id, rag_enabled "
             "FROM user_personas WHERE jabobo_id = %s"
         )
         cursor = db.cursor
@@ -414,6 +417,7 @@ async def get_device_providers(jabobo_id: str) -> dict:
             "llm": (result.get("llm_provider") or "").strip(),
             "azure_voice_id": (result.get("azure_tts_voice_id") or "").strip(),
             "huoshan_voice_id": (result.get("huoshan_tts_voice_id") or "").strip(),
+            "rag_enabled": bool(result.get("rag_enabled") or 0),
         }
     except Exception as e:
         logger.error(f"🔥 [PROVIDERS] DB error for {jabobo_id}: {e}")

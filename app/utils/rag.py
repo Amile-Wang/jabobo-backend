@@ -18,9 +18,9 @@ from loguru import logger
 load_dotenv(override=True)
 
 # ============== 从 .env 读取固定配置（带默认值） ==============
-ARK_API_KEY = os.getenv("ARK_API_KEY", "")
-ARK_EMBED_MODEL = os.getenv("ARK_EMBED_MODEL", "text-embedding-v3")
-ARK_BASE_URL = os.getenv("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
+AZURE_OAI_EMBED_API_KEY = os.getenv("AZURE_OAI_EMBED_API_KEY", "")
+AZURE_OAI_EMBED_BASE_URL = os.getenv("AZURE_OAI_EMBED_BASE_URL", "")
+AZURE_OAI_EMBED_MODEL = os.getenv("AZURE_OAI_EMBED_MODEL", "text-embedding-3-small")
 
 CHUNK_MAX_CHARS = int(os.getenv("CHUNK_MAX_CHARS", "500"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
@@ -35,9 +35,9 @@ def validate_fixed_config():
     """校验.env中的固定配置，缺失则报错"""
     required_fixed_configs = {
         "API 核心配置": [
-            ("ARK_API_KEY", ARK_API_KEY),
-            ("ARK_EMBED_MODEL", ARK_EMBED_MODEL),
-            ("ARK_BASE_URL", ARK_BASE_URL)
+            ("AZURE_OAI_EMBED_API_KEY", AZURE_OAI_EMBED_API_KEY),
+            ("AZURE_OAI_EMBED_BASE_URL", AZURE_OAI_EMBED_BASE_URL),
+            ("AZURE_OAI_EMBED_MODEL", AZURE_OAI_EMBED_MODEL)
         ],
         "文本切分配置": [
             ("CHUNK_MAX_CHARS", CHUNK_MAX_CHARS),
@@ -62,13 +62,13 @@ def validate_fixed_config():
         err_msg = "❌ .env 文件中缺失以下固定配置项：\n" + "\n".join([f"  - {item}" for item in missing_configs])
         logger.critical(err_msg)
         raise ValueError(err_msg)
-    
+
     logger.success("✅ 固定配置校验通过")
 
-# ============== 初始化 OpenAI 客户端 ==============
+# ============== 初始化 OpenAI 客户端（Azure OpenAI v1 endpoint） ==============
 client = OpenAI(
-    base_url=ARK_BASE_URL,
-    api_key=ARK_API_KEY,
+    base_url=AZURE_OAI_EMBED_BASE_URL,
+    api_key=AZURE_OAI_EMBED_API_KEY,
 )
 
 # ============== 工具函数 ==============
@@ -148,7 +148,7 @@ def generate_vector_from_txt_folder(txt_folder: str, vector_save_path: str):
         try:
             start_time = time.time()
             resp = client.embeddings.create(
-                model=ARK_EMBED_MODEL,
+                model=AZURE_OAI_EMBED_MODEL,
                 input=batch_texts,
                 timeout=60
             )
@@ -199,7 +199,7 @@ def build_rag_prompt_from_vector_file(query: str, vector_file_path: str):
     logger.info(f"🔍 生成问题向量：{query}")
     try:
         q_resp = client.embeddings.create(
-            model=ARK_EMBED_MODEL,
+            model=AZURE_OAI_EMBED_MODEL,
             input=query,
             timeout=30
         )

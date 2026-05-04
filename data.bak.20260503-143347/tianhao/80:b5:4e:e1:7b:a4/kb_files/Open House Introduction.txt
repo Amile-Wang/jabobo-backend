@@ -1,0 +1,101 @@
+Evolve3 Headset Family
+Card:
+Evolve3 85 – AI enhanced voice clarity with strongest noise cancellation in the Evolve3 range.
+Evolve3 75 – AI enhanced voice clarity in an ultra light, on ear design.
+Evolve3 65 Flex / 65 / 45 / 25 – Planned for 2026 launch. Internal demo only – no external photos or posts please.
+
+How to explain:
+This area shows the Evolve3 headset family.
+Evolve3 85 and Evolve3 75 are the first models in the line up. Evolve3 85 focuses on AI enhanced voice clarity and very strong noise cancellation to support deep focus in many different environments.
+Evolve3 75 also has AI enhanced voice clarity, but in a very light, on ear design, which is comfortable for all day meetings.
+The other models – Evolve3 65 Flex, 65, 45 and 25 – are planned for launch in 2026 and are shown here as internal demos. Visitors can try them, but no photos and no posts outside GN are allowed.
+
+
+Evolve3 Pouch Design
+Card:
+Unified pouch design for the full Evolve3 family – from hybrid workers to stationary workers. 100% rPET felt matched to headset colours, bag able, protective and cost efficient.
+
+How to explain:
+This area shows the Evolve3 headset pouches.
+The pouches cover the full Evolve3 family: 85, 75, 65 Flex, 65, 45 and 25.
+For Evolve3 85/75/65 Flex, the user profile is the hybrid worker. For this group, the key parameter is how easy it is to put the headset in a bag and carry it around – the “bag ability” of the pouch.
+For Evolve3 65/45/25, the user profile is more stationary. Here the focus is stronger on protection and cost efficient design.
+All pouches follow one unified design language: they are bag able, made from 100% rPET felt that matches the headset colour, and combine a clean, simple look with functional and cost efficient construction. Ease of use, sustainability and desirability are all taken into account in the design.
+
+
+
+
+
+
+
+
+
+
+Packaging New Materials
+Card: 
+Exploring plastic-free, more sustainable materials to protect our products – from cotton and bamboo fibers to water soluble and wood fiber papers.
+
+How to explain:
+The samples were collected from packaging trade fairs and from different suppliers.
+The goal is to find alternatives to plastic bags and plastic films that are still used to protect products.
+The packaging materials include different fiber based and low plastic materials, for example cotton fiber, bamboo pulp fiber, plant fibers, wood fiber paper, non woven plant fiber fabrics, cork, different thicknesses of felt, and also water soluble films and water resistant kraft papers.
+The main purpose is to keep the product protected during transport and at the same time make the packaging more sustainable and easier to recycle.
+
+
+PinLink
+Card:
+PinLink – A connection method between headphone modules.
+Modular, Repairable, Replaceable, Customizable, Assemblable, Portable
+ 
+How to explain:
+This area shows PinLink mockup samples.
+The connection between the headband and the ear cup is achieved through the use of pogo pins (male-female connectors) combined with the magnetic attraction of magnets. 
+•	Achieve headphones maximum modularity.
+•	Make headphones easier to repair.
+•	Make the headphones easier to assemble.
+•	Customers can freely assemble/customize/upgrade the headband or ear cups.
+•	Easy storage.
+
+
+
+
+
+
+
+
+
+
+
+
+Jabobo (Internal AI Practice Project)
+Card:
+Jabobo is an internally developed AI practice project.
+It serves as a device-based AI exploration platform, focused on integrating real-world hardware with cloud-based AI services.
+Jabobo is not a commercial product.
+Its goal is to enable early architecture validation and POC exploration, rather than delivering a finalized solution.
+
+How to explain:
+This area showcases Jabobo, an internal AI experimentation initiative. Jabobo explores how AI services can be integrated into a physical device from a system and architecture perspective, covering interaction, responsiveness, and extensibility.
+The current architecture includes:
+•	Function calling for weather and time querying, as an example of tool-based AI interaction
+•	A RAG-based memory system for context retrieval
+•	Voiceprint recognition for basic speaker identification and personalization
+This setup allows fast iteration while helping the team evaluate architectural trade-offs for future AI-enabled devices. The Jabobo shown here is one experimental form factor. In future POC explorations, it could evolve into different forms, such as a speaker-only AI device or other simplified AI terminals. The value of Jabobo lies in early exploration and learning, providing hands-on experience that can inform future AI device initiatives.
+
+Travel Mouse (Smart Cradle)
+Card:
+Travel Mouse (Smart Cradle) – An early stage demo of a smart charging cradle for wireless earbuds, with basic mouse functionality and voice typing capability.
+
+How to explain:
+This area presents the Travel Mouse (Smart Cradle) demo concept.
+Travel Mouse is first and foremost a smart cradle for wireless earbuds, designed to keep earbuds charged and ready during daily work and travel. It represents an exploration of how earbud accessories can become part of a productivity workflow.
+In addition to acting as a charging cradle, the device can also be used as a portable wireless mouse, allowing users to switch between interaction modes without carrying multiple devices.
+The demo integrates a simple voice typing capability through an AI button, showing how voice can be used as an alternative input method alongside mouse interaction. At this stage, the focus is on demonstrating the basic workflow concept, rather than optimized performance or feature completeness.
+As an early demo, Travel Mouse (Smart Cradle) is intended to validate form factor, usage scenarios, and integration direction, and does not yet represent a finalized product or full feature set.
+
+DC Headset Strategy Poster
+This poster visualizes the DC Headset strategy inside the GN framework.
+At the very top is the GN vision – “Bring People Closer with Meaningful Innovation.”
+Just below the vision, there are six guiding stars for 2030, grouped into three colors: Product, Practice and People. 
+From the bottom of the mountain up to the flags, there are three roads – one for Product, one for Practice and one for People. Each road represents what DC Headset needs to do in 2026 to move towards the 2030 guiding stars.
+At the foot of the mountain, the strategy governance and tracking mechanisms section shows how progress is monitored and how DC Headset activities stay aligned with the GN vision and the six guiding stars.
