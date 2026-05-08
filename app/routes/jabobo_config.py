@@ -155,13 +155,25 @@ async def get_user_config(
             huoshan_voice_list_raw = config.get('huoshan_tts_voice_list')
             rag_enabled = bool(config.get('rag_enabled') or 0)
 
-        # websocket_url_list 是 JSON 字符串数组，解析失败时返回空列表
+        # websocket_url_list 是 JSON 数组，统一归一为 [{name, url}]
+        # 历史数据可能是 ["wss://..."] 形式，无名字时 name 留空
         try:
-            websocket_url_list = json.loads(websocket_url_list_raw) if websocket_url_list_raw else []
-            if not isinstance(websocket_url_list, list):
-                websocket_url_list = []
+            raw_list = json.loads(websocket_url_list_raw) if websocket_url_list_raw else []
+            if not isinstance(raw_list, list):
+                raw_list = []
         except (json.JSONDecodeError, TypeError):
-            websocket_url_list = []
+            raw_list = []
+        websocket_url_list = []
+        for item in raw_list:
+            if isinstance(item, str):
+                u = item.strip()
+                if u:
+                    websocket_url_list.append({"name": "", "url": u})
+            elif isinstance(item, dict):
+                u = (item.get("url") or "").strip()
+                n = (item.get("name") or "").strip()
+                if u:
+                    websocket_url_list.append({"name": n, "url": u})
         
         # 数据类型统一+安全处理
         raw_persona = str(raw_persona).strip() if raw_persona else "[]"
@@ -238,17 +250,25 @@ async def sync_config(
         ws_url_raw = payload.get('websocket_url', '')
         websocket_url = ws_url_raw.strip() if isinstance(ws_url_raw, str) and ws_url_raw.strip() else None
 
-        # websocket_url_list: 用户保存的候选 WS 地址列表（数组），写入前序列化为 JSON
+        # websocket_url_list: 用户保存的候选 WS 服务器列表，每项 {name, url}
+        # 兼容旧前端可能仍发字符串数组的情况；按 url 去重
         ws_list_raw = payload.get('websocket_url_list', None)
         if isinstance(ws_list_raw, list):
             cleaned = []
             seen = set()
             for item in ws_list_raw:
                 if isinstance(item, str):
-                    s = item.strip()
-                    if s and s not in seen:
-                        cleaned.append(s)
-                        seen.add(s)
+                    u = item.strip()
+                    n = ""
+                elif isinstance(item, dict):
+                    u = (item.get("url") or "").strip() if isinstance(item.get("url"), str) else ""
+                    n = (item.get("name") or "").strip() if isinstance(item.get("name"), str) else ""
+                else:
+                    continue
+                if not u or u in seen:
+                    continue
+                seen.add(u)
+                cleaned.append({"name": n, "url": u})
             websocket_url_list_json = json.dumps(cleaned, ensure_ascii=False) if cleaned else None
         else:
             websocket_url_list_json = None
