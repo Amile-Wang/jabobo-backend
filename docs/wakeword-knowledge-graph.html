@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>唤醒词训练知识图谱 — Jabobo Backend</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --border: #475569;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --accent: #38bdf8;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --purple: #a855f7;
+    --red: #ef4444;
+    --teal: #14b8a6;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: .5rem;
+  }
+  header .subtitle {
+    color: var(--text2);
+    font-size: .95rem;
+  }
+  header .badge {
+    display: inline-block;
+    background: var(--surface2);
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    color: var(--text2);
+    margin-top: .75rem;
+  }
+
+  /* Section */
+  section { margin-bottom: 3rem; }
+  section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  section h2 .emoji { font-size: 1.3rem; }
+  section h2::after {
+    content: '';
+    flex:1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* Diagram card */
+  .diagram-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+  .diagram-card .title {
+    font-size: .9rem;
+    color: var(--text2);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: .75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--surface2);
+    font-weight: 600;
+    color: var(--accent);
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  tr:last-child td { border-bottom: none; }
+  td { font-size: .9rem; }
+  .code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: .82rem; color: var(--orange); }
+
+  /* Description list */
+  .desc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .desc-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+  }
+  .desc-item .key {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--accent);
+    margin-bottom: .25rem;
+  }
+  .desc-item .val {
+    font-size: 1rem;
+    word-break: break-all;
+  }
+
+  /* Status badges */
+  .status-0 { color: var(--text2); }
+  .status-1 { color: var(--green); font-weight: 600; }
+  .status-2 { color: var(--red); font-weight: 600; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.6rem; }
+    .desc-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Mermaid overrides */
+  .mermaid { text-align: center; }
+  .mermaid svg { max-width: 100%; height: auto; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    color: var(--text2);
+    font-size: .85rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧠 唤醒词训练知识图谱</h1>
+  <p class="subtitle">Jabobo Backend — FastAPI · GitNexus 索引分析</p>
+  <span class="badge">274 符号 · 605 关系 · 20 执行流</span>
+</header>
+
+<div class="container">
+
+<!-- 整体架构 -->
+<section>
+  <h2><span class="emoji">🏗️</span> 整体架构图</h2>
+  <div class="diagram-card">
+    <div class="title">前端 → API → 业务层 → 外部系统 → 数据库 → 设备</div>
+    <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f1f5f9', 'primaryBorderColor': '#475569', 'lineColor': '#38bdf8', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a'}}}%%
+graph TB
+    subgraph 前端层["前端 Dashboard"]
+        UI[Web 管理界面]
+    end
+
+    subgraph API层["jabobo-backend REST API (FastAPI, port 8007)"]
+        TrainAPI["POST /api/user/wake-word/train<br>trigger_wake_word_training()"]
+        StatusAPI["GET /api/user/wake-word/train/status<br>get_wake_word_status()"]
+        SyncAPI["POST /api/user/sync-config<br>sync_config()"]
+        GetConfig["GET /api/user/config<br>get_user_config()"]
+    end
+
+    subgraph 核心业务层["核心业务流程"]
+        direction TB
+        NORMALIZE["_normalize_wake_word()<br>标准化唤醒词名"]
+        DISPLAY["_wake_word_to_display()<br>生成显示名"]
+        TRAIN["_run_wakeword_training()<br>异步训练任务"]
+        UPDATE_STATUS["_update_wake_word_status()<br>更新数据库状态"]
+    end
+
+    subgraph 外部系统["外部系统"]
+        CMD1["train_wakeword.py<br>--generate-samples<br>（TTS 生成 500 条样本）"]
+        CMD2["train_wakeword.py<br>（特征提取+训练）"]
+        CMD3["deploy_wakeword.py<br>（OTA 部署 .tflite）"]
+    end
+
+    subgraph 数据层["MySQL 数据库"]
+        DB[("user_personas 表")]
+    end
+
+    subgraph 固件层["ESP32 设备"]
+        DEVICE["捷宝宝硬件"]
+        OTA_RECEIVER["OTA 接收+模型加载"]
+    end
+
+    UI -->|"POST /user/wake-word/train"| TrainAPI
+    UI -->|"GET /user/wake-word/train/status"| StatusAPI
+    UI -->|"POST /user/sync-config"| SyncAPI
+    UI -->|"GET /user/config"| GetConfig
+
+    TrainAPI -->|"asyncio.create_task"| TRAIN
+    SyncAPI -->|"if wake_word_text changed"| TRAIN
+    GetConfig -.->|"read model_status"| DB
+    StatusAPI -->|"查询状态"| DB
+
+    TRAIN --> NORMALIZE
+    NORMALIZE --> DISPLAY
+    TRAIN --> UPDATE_STATUS
+
+    TRAIN -->|"检查已有模型"| CMD2
+    TRAIN -->|"生成样本"| CMD1
+    CMD1 --> CMD2
+    CMD2 --> CMD3
+    CMD3 -->|"OTA 推送"| OTA_RECEIVER
+    OTA_RECEIVER --> DEVICE
+
+    UPDATE_STATUS -->|"UPDATE model_status"| DB
+
+    style 前端层 fill:#0f766e,stroke:#14b8a6,color:#fff
+    style API层 fill:#1d4ed8,stroke:#3b82f6,color:#fff
+    style 核心业务层 fill:#15803d,stroke:#22c55e,color:#fff
+    style 外部系统 fill:#b45309,stroke:#f59e0b,color:#fff
+    style 数据层 fill:#7c3aed,stroke:#a855f7,color:#fff
+    style 固件层 fill:#b91c1c,stroke:#ef4444,color:#fff
+</pre>
+  </div>
+</section>
+
+<!-- 函数调用关系 -->
+<section>
+  <h2><span class="emoji">🔗</span> 函数调用关系图</h2>
+  <div class="diagram-card">
+    <div class="title">GitNexus Cypher 查询结果 — 唤醒词训练相关符号调用链</div>
+    <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f1f5f9', 'primaryBorderColor': '#475569', 'lineColor': '#38bdf8', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a'}}}%%
+graph LR
+    subgraph API入口["API 入口"]
+        T["trigger_wake_word_training()<br>POST /user/wake-word/train"]
+        S["sync_config()<br>POST /user/sync-config"]
+        ST["get_wake_word_status()<br>GET /user/wake-word/train/status"]
+        GC["get_user_config()<br>GET /user/config"]
+    end
+
+    subgraph 辅助函数["辅助函数"]
+        NW["_normalize_wake_word()"]
+        WD["_wake_word_to_display()"]
+        UV["verify_user()<br>用户认证"]
+        GVC["get_valid_cursor()<br>数据库游标"]
+    end
+
+    subgraph 核心训练["核心训练"]
+        RT["_run_wakeword_training()"]
+        US["_update_wake_word_status()"]
+    end
+
+    subgraph 数据库["MySQL"]
+        CONN["db.connect()"]
+        QUERY["SELECT / UPDATE<br>user_personas"]
+    end
+
+    subgraph 外部进程["外部进程"]
+        CMD1["train_wakeword.py<br>--generate-samples"]
+        CMD2["train_wakeword.py<br>训练"]
+        CMD3["deploy_wakeword.py<br>OTA"]
+    end
+
+    T -->|"asyncio.create_task"| RT
+    S -.->|"if wake_word_text"| NW
+    NW --> RT
+    ST --> UV --> CONN --> QUERY
+    GC --> UV
+    GC --> GVC --> CONN
+
+    RT --> WD
+    RT --> CMD1 --> CMD2 --> CMD3
+    RT --> US --> CONN -->|"UPDATE model_status"| QUERY
+
+    style API入口 fill:#1e3a5f,stroke:#38bdf8,color:#fff
+    style 辅助函数 fill:#1e3a5f,stroke:#38bdf8,color:#fff
+    style 核心训练 fill:#1e3a5f,stroke:#22c55e,color:#fff
+    style 数据库 fill:#4a1a7a,stroke:#a855f7,color:#fff
+    style 外部进程 fill:#5c3d0a,stroke:#f59e0b,color:#fff
+</pre>
+  </div>
+</section>
+
+<!-- 训练时间线 -->
+<section>
+  <h2><span class="emoji">🕐</span> 训练时序图</h2>
+  <div class="diagram-card">
+    <div class="title">从用户点击"训练"到模型部署到设备的全过程</div>
+    <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f1f5f9', 'primaryBorderColor': '#475569', 'lineColor': '#38bdf8', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a'}}}%%
+sequenceDiagram
+    participant U as 用户/前端
+    participant API as jabobo-backend
+    participant MEM as 进程缓存<br>_wake_word_tasks
+    participant DB as MySQL
+    participant CONDA as Conda wakeword<br>TTS + 训练脚本
+    participant DEV as ESP32 设备
+
+    U->>API: POST /user/wake-word/train<br>{device_id, wake_word: "Hey Jabra"}
+    Note over API: 标准化: hey_jabra<br>显示名: Hey Jabra
+    API->>MEM: {status: "running"}
+    API-->>U: 200 任务已启动
+    API-->>API: asyncio.create_task()
+
+    rect rgb(30, 58, 95)
+        Note over API,CONDA: 阶段1: TTS 生成 500 条样本
+        alt 已有 .tflite
+            API-->>API: 跳过训练，直接部署
+        else 首次训练
+            API->>CONDA: train_wakeword.py --generate-samples<br>--text "Hey Jabra" --max-samples 500<br>--voices lessac,amy,joe --length-scales 0.5~1.0
+            Note over CONDA: 多种音色 × 5 种语速<br>= 数千条 WAV 样本
+            CONDA-->>API: 样本生成完成
+        end
+    end
+
+    rect rgb(21, 128, 61)
+        Note over API,CONDA: 阶段2: 模型训练
+        API->>CONDA: train_wakeword.py
+        Note over CONDA: MFCC 特征提取 → CNN 训练 → TFLite 量化导出
+        CONDA-->>API: trained_models/hey_jabra/hey_jabra.tflite
+    end
+
+    rect rgb(180, 83, 9)
+        Note over API,DEV: 阶段3: OTA 部署
+        API->>CONDA: deploy_wakeword.py
+        CONDA-->>DEV: OTA 推送 .tflite 模型
+        DEV-->>CONDA: 部署确认
+    end
+
+    rect rgb(124, 58, 237)
+        Note over API,DB: 阶段4: 数据库持久化
+        API->>DB: UPDATE user_personas SET wake_word_model_status=1
+        API->>MEM: {status: "done", elapsed: 187s}
+    end
+
+    U->>API: GET /user/wake-word/train/status
+    API->>MEM: 读取状态
+    API-->>U: {status: "done", elapsed_seconds: 187}
+</pre>
+  </div>
+</section>
+
+<!-- 状态机 -->
+<section>
+  <h2><span class="emoji">🔄</span> 模型状态机</h2>
+  <div class="diagram-card" style="max-width: 500px; margin: 0 auto;">
+    <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f1f5f9', 'primaryBorderColor': '#475569', 'lineColor': '#38bdf8', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a'}}}%%
+stateDiagram-v2
+    [*] --> 未训练 : 设备绑定<br>status = 0
+    未训练 --> 训练中 : POST /user/wake-word/train
+    训练中 --> 已部署 : 训练+部署成功<br>status = 1
+    训练中 --> 训练失败 : 异常退出<br>status = 2
+    已部署 --> 训练中 : 重新训练
+    训练失败 --> 训练中 : 重试
+</pre>
+  </div>
+</section>
+
+<!-- ER 图 -->
+<section>
+  <h2><span class="emoji">🗄️</span> 数据库 ER 图</h2>
+  <div class="diagram-card">
+    <div class="title">user_login ↔ user_personas — 唤醒词相关字段高亮</div>
+    <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f1f5f9', 'primaryBorderColor': '#475569', 'lineColor': '#38bdf8', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a'}}}%%
+erDiagram
+    user_login ||--o{ user_personas : has
+
+    user_login {
+        int id PK
+        string username UK
+    }
+
+    user_personas {
+        int id PK
+        string username FK
+        string jabobo_id UK
+        json personas
+        text memory
+        string websocket_url
+        string asr_provider
+        string tts_provider
+        string llm_provider
+        boolean rag_enabled
+        string wake_word_text "用户设定的唤醒词"
+        int wake_word_model_status "0=未训练 1=已部署 2=失败"
+        string current_version
+        string expected_version
+        json voiceprint_list
+    }
+</pre>
+  </div>
+</section>
+
+<!-- 配置参数 -->
+<section>
+  <h2><span class="emoji">⚙️</span> 配置参数表</h2>
+  <table>
+    <thead>
+      <tr><th>参数</th><th>值</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="code">_TRAIN_WORK_DIR</td><td>~/Jabobo/wakeword train/</td><td>训练工作目录</td></tr>
+      <tr><td class="code">_TRAIN_CONDA_ENV</td><td>wakeword</td><td>Conda 训练环境</td></tr>
+      <tr><td class="code">_TRAIN_LOG_DIR</td><td>{WORK_DIR}/_training_logs/</td><td>每轮训练日志</td></tr>
+      <tr><td class="code">max-samples</td><td>500</td><td>每轮 TTS 生成样本数</td></tr>
+      <tr><td class="code">length-scales</td><td>0.5 0.6 0.75 0.9 1.0</td><td>5 种语速增强鲁棒性</td></tr>
+      <tr><td class="code">EN_VOICES</td><td>lessac, amy, joe, alan, norman, libritts_r</td><td>英文 TTS 音色（6 种）</td></tr>
+      <tr><td class="code">ZH_VOICES</td><td>chaowen, huayan, xiao_ya</td><td>中文 TTS 音色（3 种）</td></tr>
+      <tr><td class="code">wake_word_text</td><td>用户自定义</td><td>存入 user_personas 表</td></tr>
+      <tr><td class="code">model_status 0</td><td><span class="status-0">未训练</span></td><td>设备绑定后默认状态</td></tr>
+      <tr><td class="code">model_status 1</td><td><span class="status-1">已部署 ✓</span></td><td>训练+部署成功</td></tr>
+      <tr><td class="code">model_status 2</td><td><span class="status-2">失败 ✗</span></td><td>训练异常退出</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 函数清单 -->
+<section>
+  <h2><span class="emoji">📋</span> 函数清单</h2>
+  <table>
+    <thead>
+      <tr><th>函数名</th><th>文件</th><th>行号</th><th>职责</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="code">trigger_wake_word_training</td><td>jabobo_config.py</td><td>—</td><td>API 入口，异步启动训练</td></tr>
+      <tr><td class="code">get_wake_word_status</td><td>jabobo_config.py</td><td>—</td><td>API 查询训练状态</td></tr>
+      <tr><td class="code">sync_config</td><td>jabobo_config.py</td><td>420</td><td>同步配置时触发训练</td></tr>
+      <tr><td class="code">get_user_config</td><td>jabobo_config.py</td><td>274</td><td>读取设备配置含模型状态</td></tr>
+      <tr><td class="code">_run_wakeword_training</td><td>jabobo_config.py</td><td>55</td><td>🔥 核心异步训练任务</td></tr>
+      <tr><td class="code">_normalize_wake_word</td><td>jabobo_config.py</td><td>22</td><td>标准化唤醒词为 code name</td></tr>
+      <tr><td class="code">_wake_word_to_display</td><td>jabobo_config.py</td><td>49</td><td>生成前端显示文本</td></tr>
+      <tr><td class="code">_update_wake_word_status</td><td>jabobo_config.py</td><td>175</td><td>写 model_status 到 DB</td></tr>
+      <tr><td class="code">verify_user</td><td>security.py</td><td>—</td><td>API 认证校验</td></tr>
+      <tr><td class="code">get_valid_cursor</td><td>security.py</td><td>—</td><td>获取数据库游标</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 关键代码 -->
+<section>
+  <h2><span class="emoji">💡</span> 关键代码片段</h2>
+  <div class="desc-grid">
+    <div class="desc-item">
+      <div class="key">标准化唤醒词名</div>
+      <div class="val" style="font-size:.8rem;font-family:monospace;color:#f59e0b">
+        _normalize_wake_word(text)<br>
+        "Hey Jabra" → "hey_jabra"<br>
+        "hi，Jabra" → "hi_jabra"
+      </div>
+    </div>
+    <div class="desc-item">
+      <div class="key">智能音色选择</div>
+      <div class="val" style="font-size:.8rem;font-family:monospace;color:#f59e0b">
+        含中文 → ZH_VOICES<br>
+        纯英文 → EN_VOICES
+      </div>
+    </div>
+    <div class="desc-item">
+      <div class="key">状态管理</div>
+      <div class="val" style="font-size:.8rem;font-family:monospace;color:#f59e0b">
+        _wake_word_tasks[<br>
+        &nbsp;&nbsp;f"{wake_word}@{device_id}"<br>
+        ] = {status, elapsed}
+      </div>
+    </div>
+    <div class="desc-item">
+      <div class="key">数据库更新</div>
+      <div class="val" style="font-size:.8rem;font-family:monospace;color:#f59e0b">
+        UPDATE user_personas<br>
+        SET wake_word_model_status=N<br>
+        WHERE jabobo_id = %s
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Generated by GitNexus · jabobo-backend· 唤醒词训练知识图谱<br>
+  数据来源: app/routes/jabobo_config.py · 外部脚本: train_wakeword.py + deploy_wakeword.py
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#f1f5f9',
+      primaryBorderColor: '#475569',
+      lineColor: '#38bdf8',
+      secondaryColor: '#334155',
+      tertiaryColor: '#0f172a',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif'
+    },
+    sequence: {
+      showSequenceNumbers: false,
+      actorFontSize: 13,
+      noteFontSize: 12
+    },
+    flowchart: {
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+</body>
+</html>

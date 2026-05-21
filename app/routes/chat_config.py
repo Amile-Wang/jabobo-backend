@@ -388,6 +388,8 @@ _EMPTY_PROVIDERS = {
     "asr": "", "tts": "", "llm": "",
     "azure_voice_id": "", "huoshan_voice_id": "",
     "rag_enabled": False,
+    "wake_word_text": "",
+    "wake_word_model_status": 0,
 }
 
 
@@ -403,7 +405,8 @@ async def get_device_providers(jabobo_id: str) -> dict:
             return dict(_EMPTY_PROVIDERS)
         sql = (
             "SELECT asr_provider, tts_provider, llm_provider, "
-            "azure_tts_voice_id, huoshan_tts_voice_id, rag_enabled "
+            "azure_tts_voice_id, huoshan_tts_voice_id, rag_enabled, "
+            "wake_word_text, wake_word_model_status "
             "FROM user_personas WHERE jabobo_id = %s"
         )
         cursor = db.cursor
@@ -418,6 +421,8 @@ async def get_device_providers(jabobo_id: str) -> dict:
             "azure_voice_id": (result.get("azure_tts_voice_id") or "").strip(),
             "huoshan_voice_id": (result.get("huoshan_tts_voice_id") or "").strip(),
             "rag_enabled": bool(result.get("rag_enabled") or 0),
+            "wake_word_text": (result.get("wake_word_text") or "").strip(),
+            "wake_word_model_status": int(result.get("wake_word_model_status") or 0),
         }
     except Exception as e:
         logger.error(f"🔥 [PROVIDERS] DB error for {jabobo_id}: {e}")
